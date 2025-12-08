@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Google</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        margin: 0;
+      }
+
+      .container {
+        text-align: center;
+      }
+
+      .logo {
+        font-size: 80px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        font-family: Arial, sans-serif;
+      }
+
+      .logo span {
+        font-weight: normal;
+      }
+
+      /* Màu chữ Google */
+      .logo {
+        color: #4285f4;
+      }
+      .logo::after {
+        content: "oogle";
+        color: #db4437;
+      }
+      .logo::before {
+        content: "G";
+        color: #4285f4;
+      }
+
+      .google-logo {
+        height: 92px;
+      }
+
+      /* Search box */
+      .search-box {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        padding: 14px 20px;
+        width: 580px;
+        margin: 30px auto 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-box input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 18px;
+      }
+
+      .search-box .search-icon {
+        margin-right: 10px;
+        margin-top: 2px;
+      }
+
+      .search-box .icons .icon {
+        margin-left: 10px;
+        cursor: pointer;
+      }
+
+      .icons {
+        margin-top: 2px;
+      }
+
+      /* Buttons */
+
+      .buttons {
+        margin-top: 30px;
+      }
+
+      .buttons button {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background: #f8f9fa;
+        cursor: pointer;
+        font-size: 16px;
+        border: 1px solid transparent;
+      }
+
+      .buttons button:hover {
+        border: 1px solid #dadce0;
+      }
+
+      /* Language */
+      .lang {
+        margin-top: 20px;
+        font-size: 16px;
+      }
+
+      .lang a {
+        margin: 0 5px;
+        text-decoration: none;
+        color: #1a0dab;
+      }
+      .lang a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <img
+          src="https://static.vecteezy.com/system/resources/previews/028/667/072/non_2x/google-logo-icon-symbol-free-png.png"
+          alt=""
+          class="google-logo"
+        />
+      </div>
+      <div class="search-box">
+        <span class="search-icon">
+          <span class="icon">
+            <svg
+              focusable="false"
+              aria-hidden="true"
+              height="24px"
+              width="24px"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+              ></path>
+            </svg>
+          </span>
+        </span>
+        <input type="text" />
+        <div class="icons">
+          <span class="icon">
+            <svg
+              aria-hidden="true"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="var(--bbQxAb)"
+                d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm160-120h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Z"
+              ></path>
+            </svg>
+          </span>
+          <span class="icon">
+            <svg
+              class="goxjub"
+              aria-hidden="true"
+              height="24px"
+              focusable="false"
+              viewBox="0 -960 960 960"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="var(--bbQxAb)"
+                d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm-40 280v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Z"
+              ></path>
+            </svg>
+          </span>
+          <span class="icon">
+            <svg
+              class="Gdd5U"
+              aria-hidden="true"
+              height="24px"
+              focusable="false"
+              viewBox="0 -960 960 960"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="var(--bbQxAb)"
+                d="M480-320q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35Zm240 160q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm-440 40q-66 0-113-47t-47-113v-80h80v80q0 33 23.5 56.5T280-200h200v80H280Zm480-320v-160q0-33-23.5-56.5T680-680H280q-33 0-56.5 23.5T200-600v120h-80v-120q0-66 47-113t113-47h80l40-80h160l40 80h80q66 0 113 47t47 113v160h-80Z"
+              ></path>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button>Tìm trên Google</button>
+        <button>Xem trang đầu tiên tìm được</button>
+      </div>
+      <p class="lang">
+        Google hỗ trợ các ngôn ngữ:
+        <a href="#">English</a>
+        <a href="#">Français</a>
+        <a href="#">繁體中文</a>
+      </p>
+    </div>
+  </body>
+</html>

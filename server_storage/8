@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Quản Lý Chung Cư</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#f0f4ff',
+                500: '#667eea',
+                600: '#5a67d8',
+                700: '#4c51bf'
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              float: 'float 3s ease-in-out infinite',
+              'slide-up': 'slideUp 0.3s ease-out'
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-10px)' }
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(2px)' },
+                '100%': { transform: 'translateY(-2px)' }
+              }
+            },
+            backdropBlur: {
+              xs: '2px'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        box-sizing: border-box;
+      }
+
+      @layer utilities {
+        .gradient-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-morphism {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .input-glow:focus {
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1),
+            0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-glow:hover {
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+      }
+    </style>
+  </head>
+  <body class="gradient-primary min-h-full">
+    <div class="min-h-full flex items-center justify-center px-4 py-12">
+      <div class="max-w-md w-full">
+        <!-- Logo và Tiêu đề -->
+        <div class="text-center mb-8">
+          <div class="animate-float inline-block text-white text-6xl mb-4">
+            🏢
+          </div>
+          <h1 class="text-3xl font-bold text-white mb-2">Quản Lý Chung Cư</h1>
+          <p class="text-white/90">Hệ thống quản lý hiện đại và thông minh</p>
+        </div>
+
+        <!-- Form Container -->
+        <div class="glass-morphism rounded-2xl p-8 animate-fade-in shadow-2xl">
+          <!-- Tabs -->
+          <div class="flex mb-8 bg-gray-100 rounded-lg p-1">
+            <button
+              id="loginTab"
+              class="flex-1 py-2 px-4 rounded-md font-semibold transition-all duration-300 bg-white text-primary-600 shadow-sm hover:shadow-md">
+              Đăng Nhập
+            </button>
+            <button
+              id="registerTab"
+              class="flex-1 py-2 px-4 rounded-md font-semibold transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-white/50">
+              Đăng Ký
+            </button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="loginForm" class="space-y-6">
+            <div>
+              <label
+                for="loginEmail"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Email hoặc Số điện thoại
+              </label>
+              <input
+                type="text"
+                id="loginEmail"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập email hoặc số điện thoại"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="loginPassword"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Mật khẩu
+              </label>
+              <input
+                type="password"
+                id="loginPassword"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập mật khẩu"
+                required />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
+                <span class="ml-2 text-sm text-gray-600">
+                  Ghi nhớ đăng nhập
+                </span>
+              </label>
+              <a
+                href="#"
+                class="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                Quên mật khẩu?
+              </a>
+            </div>
+
+            <button
+              type="submit"
+              class="gradient-primary btn-glow w-full py-3 text-white font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+              Đăng Nhập
+            </button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="registerForm" class="space-y-6 hidden">
+            <div>
+              <label
+                for="registerName"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Họ và tên
+              </label>
+              <input
+                type="text"
+                id="registerName"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập họ và tên"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="registerEmail"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="registerEmail"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập email"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="registerPhone"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Số điện thoại
+              </label>
+              <input
+                type="tel"
+                id="registerPhone"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập số điện thoại"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="registerApartment"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Mã căn hộ
+              </label>
+              <input
+                type="text"
+                id="registerApartment"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="VD: A-1201"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="registerPassword"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Mật khẩu
+              </label>
+              <input
+                type="password"
+                id="registerPassword"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập mật khẩu"
+                required />
+            </div>
+
+            <div>
+              <label
+                for="registerConfirmPassword"
+                class="block text-sm font-medium text-gray-700 mb-2">
+                Xác nhận mật khẩu
+              </label>
+              <input
+                type="password"
+                id="registerConfirmPassword"
+                class="input-glow w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 transition-all duration-300 hover:-translate-y-0.5"
+                placeholder="Nhập lại mật khẩu"
+                required />
+            </div>
+
+            <label class="flex items-start">
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 mt-1"
+                required />
+              <span class="ml-2 text-sm text-gray-600">
+                Tôi đồng ý với
+                <a
+                  href="#"
+                  class="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                  Điều khoản sử dụng
+                </a>
+                và
+                <a
+                  href="#"
+                  class="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                  Chính sách bảo mật
+                </a>
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              class="gradient-primary btn-glow w-full py-3 text-white font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+              Đăng Ký
+            </button>
+          </form>
+
+          <!-- Success Message -->
+          <div
+            id="successMessage"
+            class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center">
+              <span class="text-2xl mr-3">✅</span>
+              <div>
+                <p class="font-semibold text-green-800" id="successTitle">
+                  Thành công!
+                </p>
+                <p class="text-sm text-green-600" id="successText"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 text-white text-sm">
+          <p>© 2024 Hệ Thống Quản Lý Chung Cư. Bảo mật và an toàn.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const loginTab = document.getElementById('loginTab')
+      const registerTab = document.getElementById('registerTab')
+      const loginForm = document.getElementById('loginForm')
+      const registerForm = document.getElementById('registerForm')
+      const successMessage = document.getElementById('successMessage')
+      const successTitle = document.getElementById('successTitle')
+      const successText = document.getElementById('successText')
+
+      // Tab switching
+      loginTab.addEventListener('click', () => {
+        loginTab.classList.add('bg-white', 'text-primary-600', 'shadow-sm')
+        loginTab.classList.remove('text-gray-600', 'hover:bg-white/50')
+        registerTab.classList.remove(
+          'bg-white',
+          'text-primary-600',
+          'shadow-sm'
+        )
+        registerTab.classList.add('text-gray-600', 'hover:bg-white/50')
+
+        loginForm.classList.remove('hidden')
+        registerForm.classList.add('hidden')
+        successMessage.classList.add('hidden')
+      })
+
+      registerTab.addEventListener('click', () => {
+        registerTab.classList.add('bg-white', 'text-primary-600', 'shadow-sm')
+        registerTab.classList.remove('text-gray-600', 'hover:bg-white/50')
+        loginTab.classList.remove('bg-white', 'text-primary-600', 'shadow-sm')
+        loginTab.classList.add('text-gray-600', 'hover:bg-white/50')
+
+        registerForm.classList.remove('hidden')
+        loginForm.classList.add('hidden')
+        successMessage.classList.add('hidden')
+      })
+
+      // Login form submission
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const email = document.getElementById('loginEmail').value
+
+        successTitle.textContent = 'Đăng nhập thành công!'
+        successText.textContent = `Chào mừng bạn trở lại, ${email}. Đang chuyển đến trang chủ...`
+        successMessage.classList.remove('hidden')
+
+        loginForm.reset()
+      })
+
+      // Register form submission
+      registerForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const password = document.getElementById('registerPassword').value
+        const confirmPassword = document.getElementById(
+          'registerConfirmPassword'
+        ).value
+        const name = document.getElementById('registerName').value
+
+        if (password !== confirmPassword) {
+          alert('Mật khẩu xác nhận không khớp!')
+          return
+        }
+
+        successTitle.textContent = 'Đăng ký thành công!'
+        successText.textContent = `Chào mừng ${name}! Tài khoản của bạn đã được tạo. Vui lòng kiểm tra email để xác thực.`
+        successMessage.classList.remove('hidden')
+
+        registerForm.reset()
+      })
+    </script>
+    <script>
+      ;(function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document
+          if (b) {
+            var d = b.createElement('script')
+            d.innerHTML =
+              "window.__CF$cv$params={r:'992fc3f262cbdd40',t:'MTc2MTIwNzEwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"
+            b.getElementsByTagName('head')[0].appendChild(d)
+          }
+        }
+        if (document.body) {
+          var a = document.createElement('iframe')
+          a.height = 1
+          a.width = 1
+          a.style.position = 'absolute'
+          a.style.top = 0
+          a.style.left = 0
+          a.style.border = 'none'
+          a.style.visibility = 'hidden'
+          document.body.appendChild(a)
+          if ('loading' !== document.readyState) c()
+          else if (window.addEventListener)
+            document.addEventListener('DOMContentLoaded', c)
+          else {
+            var e = document.onreadystatechange || function () {}
+            document.onreadystatechange = function (b) {
+              e(b)
+              'loading' !== document.readyState &&
+                ((document.onreadystatechange = e), c())
+            }
+          }
+        }
+      })()
+    </script>
+  </body>
+</html>

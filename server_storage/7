@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cư dân - Hệ thống Quản lý Chung cư</title>
+    <script
+      type="text/javascript"
+      nonce="6df0d9d1c74f43b498963c6ee97"
+      src="//local.adguard.org?ts=1759228573667&amp;type=content-script&amp;dmn=bpkdf3cqj2hjwt0r.canva-hosted-embed.com&amp;url=https%3A%2F%2Fbpkdf3cqj2hjwt0r.canva-hosted-embed.com%2Fcodelet%2FAAEAEGJwa2RmM2NxajJoand0MHIAAAAAAZmfZkcSMusGrdxUgSRWX05yO_GqkDKfr4dmCCaP2W0fo7HYUTc%2Findex.html&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"
+    ></script>
+    <script
+      type="text/javascript"
+      nonce="6df0d9d1c74f43b498963c6ee97"
+      src="//local.adguard.org?ts=1759228573667&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        box-sizing: border-box;
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .notification-badge {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .payment-method {
+        transition: all 0.3s ease;
+      }
+      .payment-method:hover {
+        transform: scale(1.02);
+      }
+      .sidebar-transition {
+        transition: transform 0.3s ease-in-out;
+      }
+      @media (max-width: 768px) {
+        .sidebar-hidden {
+          transform: translateX(-100%);
+        }
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button id="menuToggle" class="md:hidden text-white">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+              <i class="fas fa-building text-2xl"></i>
+              <div>
+                <h1 class="text-xl font-bold">Vinhomes Central Park</h1>
+                <p class="text-sm opacity-90">Cổng thông tin cư dân</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="hidden md:flex items-center space-x-2">
+              <div
+                class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+              >
+                <i class="fas fa-user text-sm"></i>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Nguyễn Văn An</p>
+                <p class="text-xs opacity-75">Căn hộ A1205</p>
+              </div>
+            </div>
+            <button class="relative">
+              <i class="fas fa-bell text-xl"></i>
+              <span
+                class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center notification-badge"
+                >3</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="bg-white w-64 shadow-lg sidebar-transition md:translate-x-0 sidebar-hidden fixed md:relative z-30 h-full"
+      >
+        <div class="p-6">
+          <!-- User Profile Card -->
+          <div class="mb-6">
+            <div
+              class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-xl text-white"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+                >
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <p class="font-semibold">Nguyễn Văn An</p>
+                  <p class="text-sm opacity-90">Căn hộ A1205</p>
+                  <p class="text-xs opacity-75">Tòa A - Tầng 12</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Menu -->
+          <nav class="space-y-2">
+            <button
+              class="nav-item w-full text-left px-4 py-3 rounded-lg bg-blue-50 text-blue-700 font-medium transition-colors flex items-center space-x-3"
+              data-section="dashboard"
+            >
+              <i class="fas fa-home text-blue-500"></i>
+              <span>Trang chủ</span>
+            </button>
+
+            <div class="space-y-1">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2"
+              >
+                Thông tin cá nhân
+              </p>
+              <button
+                class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-3"
+                data-section="profile"
+              >
+                <i class="fas fa-id-card text-green-500"></i>
+                <span>Hồ sơ cá nhân</span>
+              </button>
+              <button
+                class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-3"
+                data-section="apartment"
+              >
+                <i class="fas fa-building text-purple-500"></i>
+                <span>Thông tin căn hộ</span>
+              </button>
+            </div>
+
+            <div class="space-y-1">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2"
+              >
+                Dịch vụ
+              </p>
+              <button
+                class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-3"
+                data-section="payment"
+              >
+                <i class="fas fa-credit-card text-green-500"></i>
+                <span>Thanh toán</span>
+                <span
+                  class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
+                  >1</span
+                >
+              </button>
+              <button
+                class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-3"
+                data-section="services"
+              >
+                <i class="fas fa-concierge-bell text-purple-500"></i>
+                <span>Đăng ký dịch vụ</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-6 md:ml-0">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+              Chào mừng trở lại!
+            </h2>
+            <p class="text-gray-600">
+              Hôm nay là ngày <span id="currentDate"></span>
+            </p>
+          </div>
+
+          <!-- Quick Stats -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          >
+            <div class="bg-white p-6 rounded-xl shadow-sm card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600">
+                    Hóa đơn chưa thanh toán
+                  </p>
+                  <p class="text-2xl font-bold text-red-600">1</p>
+                  <p class="text-xs text-red-500">Quá hạn 5 ngày</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-exclamation-triangle text-red-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600">
+                    Dịch vụ đang dùng
+                  </p>
+                  <p class="text-2xl font-bold text-green-600">3</p>
+                  <p class="text-xs text-green-500">Xe máy, Internet, Gym</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600">
+                    Phản ánh đang xử lý
+                  </p>
+                  <p class="text-2xl font-bold text-yellow-600">2</p>
+                  <p class="text-xs text-yellow-500">Dự kiến hoàn thành sớm</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-clock text-yellow-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600">Thông báo mới</p>
+                  <p class="text-2xl font-bold text-blue-600">3</p>
+                  <p class="text-xs text-blue-500">Cần xem ngay</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-bell text-blue-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions Grid -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          >
+            <div
+              class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white card-hover cursor-pointer"
+              onclick="showSection('payment')"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">Thanh toán hóa đơn</h3>
+                  <p class="text-sm opacity-90">
+                    Thanh toán nhanh chóng và an toàn
+                  </p>
+                </div>
+                <i class="fas fa-credit-card text-3xl opacity-80"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white card-hover cursor-pointer"
+              onclick="showSection('profile')"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">Hồ sơ cá nhân</h3>
+                  <p class="text-sm opacity-90">Quản lý thông tin cá nhân</p>
+                </div>
+                <i class="fas fa-user text-3xl opacity-80"></i>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl text-white card-hover cursor-pointer"
+              onclick="showSection('services')"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">Đăng ký dịch vụ</h3>
+                  <p class="text-sm opacity-90">
+                    Xe máy, ô tô, internet, gym...
+                  </p>
+                </div>
+                <i class="fas fa-concierge-bell text-3xl opacity-80"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile" class="content-section hidden">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Hồ sơ cá nhân</h2>
+            <p class="text-gray-600">Quản lý thông tin cá nhân và gia đình</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center space-x-4 mb-6">
+                  <div
+                    class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white text-2xl font-bold">NV</span>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-semibold">Nguyễn Văn An</h3>
+                    <p class="text-gray-600">Chủ hộ - Căn hộ A1205</p>
+                    <p class="text-sm text-gray-500">
+                      Thành viên từ: 15/03/2020
+                    </p>
+                  </div>
+                  <button
+                    id="editProfileBtn"
+                    class="ml-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <i class="fas fa-edit mr-2"></i>Chỉnh sửa
+                  </button>
+                </div>
+
+                <!-- View Mode -->
+                <div
+                  id="profileView"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                  <div>
+                    <h4 class="font-semibold mb-4 text-gray-800">
+                      Thông tin cá nhân
+                    </h4>
+                    <div class="space-y-4">
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Họ và tên</label
+                        >
+                        <p class="font-medium">Nguyễn Văn An</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Số điện thoại</label
+                        >
+                        <p class="font-medium">0901234567</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block">Email</label>
+                        <p class="font-medium">nguyenvanan@email.com</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >CCCD/CMND</label
+                        >
+                        <p class="font-medium">001234567890</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Ngày sinh</label
+                        >
+                        <p class="font-medium">15/08/1985</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Giới tính</label
+                        >
+                        <p class="font-medium">Nam</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold mb-4 text-gray-800">
+                      Thông tin liên hệ khẩn cấp
+                    </h4>
+                    <div class="space-y-4">
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Người liên hệ</label
+                        >
+                        <p class="font-medium">Trần Thị Bình (Vợ)</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Số điện thoại</label
+                        >
+                        <p class="font-medium">0987654321</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Mối quan hệ</label
+                        >
+                        <p class="font-medium">Vợ</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 rounded-lg">
+                        <label class="text-sm text-gray-600 block"
+                          >Địa chỉ thường trú</label
+                        >
+                        <p class="font-medium">
+                          123 Nguyễn Văn Linh, Q.7, TP.HCM
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div id="profileEdit" class="hidden">
+                  <form
+                    class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    onsubmit="saveProfile(event)"
+                  >
+                    <div>
+                      <h4 class="font-semibold mb-4 text-gray-800">
+                        Thông tin cá nhân
+                      </h4>
+                      <div class="space-y-4">
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Họ và tên</label
+                          >
+                          <input
+                            type="text"
+                            value="Nguyễn Văn An"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Số điện thoại</label
+                          >
+                          <input
+                            type="tel"
+                            value="0901234567"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Email</label
+                          >
+                          <input
+                            type="email"
+                            value="nguyenvanan@email.com"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >CCCD/CMND</label
+                          >
+                          <input
+                            type="text"
+                            value="001234567890"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Ngày sinh</label
+                          >
+                          <input
+                            type="date"
+                            value="1985-08-15"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Giới tính</label
+                          >
+                          <select
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="Nam" selected>Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold mb-4 text-gray-800">
+                        Thông tin liên hệ khẩn cấp
+                      </h4>
+                      <div class="space-y-4">
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Người liên hệ</label
+                          >
+                          <input
+                            type="text"
+                            value="Trần Thị Bình"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Số điện thoại</label
+                          >
+                          <input
+                            type="tel"
+                            value="0987654321"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Mối quan hệ</label
+                          >
+                          <select
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="Vợ" selected>Vợ</option>
+                            <option value="Chồng">Chồng</option>
+                            <option value="Con">Con</option>
+                            <option value="Cha">Cha</option>
+                            <option value="Mẹ">Mẹ</option>
+                            <option value="Anh/Chị">Anh/Chị</option>
+                            <option value="Khác">Khác</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="text-sm text-gray-600 block mb-1"
+                            >Địa chỉ thường trú</label
+                          >
+                          <textarea
+                            rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+123 Nguyễn Văn Linh, Q.7, TP.HCM</textarea
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div class="md:col-span-2 flex space-x-4">
+                      <button
+                        type="submit"
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors"
+                      >
+                        <i class="fas fa-save mr-2"></i>Lưu thay đổi
+                      </button>
+                      <button
+                        type="button"
+                        id="cancelEditBtn"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+                      >
+                        <i class="fas fa-times mr-2"></i>Hủy
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Family Members -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                  <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-semibold text-gray-800">
+                      Thành viên gia đình
+                    </h4>
+                    <button
+                      class="text-blue-600 hover:text-blue-800 text-sm"
+                      onclick="addFamilyMember()"
+                    >
+                      <i class="fas fa-plus mr-1"></i>Thêm thành viên
+                    </button>
+                  </div>
+                  <div id="familyMembers" class="space-y-3">
+                    <div
+                      class="flex items-center justify-between p-4 bg-blue-50 rounded-lg"
+                    >
+                      <div class="flex items-center space-x-3">
+                        <div
+                          class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center"
+                        >
+                          <span class="text-white text-sm font-medium">TB</span>
+                        </div>
+                        <div>
+                          <p class="font-medium">Trần Thị Bình</p>
+                          <p class="text-sm text-gray-600">Vợ - 0987654321</p>
+                          <p class="text-xs text-gray-500">Sinh: 20/05/1988</p>
+                        </div>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button
+                          class="text-blue-600 hover:text-blue-800"
+                          onclick="editFamilyMember(1)"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button
+                          class="text-red-600 hover:text-red-800"
+                          onclick="deleteFamilyMember(1)"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center justify-between p-4 bg-green-50 rounded-lg"
+                    >
+                      <div class="flex items-center space-x-3">
+                        <div
+                          class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center"
+                        >
+                          <span class="text-white text-sm font-medium">NK</span>
+                        </div>
+                        <div>
+                          <p class="font-medium">Nguyễn Minh Khang</p>
+                          <p class="text-sm text-gray-600">
+                            Con trai - 15 tuổi
+                          </p>
+                          <p class="text-xs text-gray-500">Sinh: 10/12/2008</p>
+                        </div>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button
+                          class="text-green-600 hover:text-green-800"
+                          onclick="editFamilyMember(2)"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button
+                          class="text-red-600 hover:text-red-800"
+                          onclick="deleteFamilyMember(2)"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <!-- Access Cards -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h4 class="font-semibold mb-4">Thẻ ra vào</h4>
+                <div class="space-y-3">
+                  <div
+                    class="p-4 border-2 border-green-200 bg-green-50 rounded-lg"
+                  >
+                    <div class="flex justify-between items-center mb-2">
+                      <div>
+                        <p class="font-medium text-green-700">Thẻ chính</p>
+                        <p class="text-sm text-green-600">ID: #A1205001</p>
+                      </div>
+                      <span
+                        class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+                        >Hoạt động</span
+                      >
+                    </div>
+                    <div class="text-xs text-green-600 mb-3">
+                      <p>Cấp: 15/03/2020</p>
+                      <p>Hạn: Vô thời hạn</p>
+                      <p>Lần cuối sử dụng: 13/12/2024 08:30</p>
+                    </div>
+                    <div class="flex space-x-2">
+                      <button
+                        class="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
+                        onclick="viewCardHistory('A1205001')"
+                      >
+                        Lịch sử
+                      </button>
+                      <button
+                        class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                        onclick="lockCard('A1205001')"
+                      >
+                        Khóa thẻ
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="p-4 border-2 border-blue-200 bg-blue-50 rounded-lg"
+                  >
+                    <div class="flex justify-between items-center mb-2">
+                      <div>
+                        <p class="font-medium text-blue-700">Thẻ phụ</p>
+                        <p class="text-sm text-blue-600">ID: #A1205002</p>
+                      </div>
+                      <span
+                        class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
+                        >Hoạt động</span
+                      >
+                    </div>
+                    <div class="text-xs text-blue-600 mb-3">
+                      <p>Cấp: 20/06/2023</p>
+                      <p>Hạn: Vô thời hạn</p>
+                      <p>Lần cuối sử dụng: 12/12/2024 18:45</p>
+                    </div>
+                    <div class="flex space-x-2">
+                      <button
+                        class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                        onclick="viewCardHistory('A1205002')"
+                      >
+                        Lịch sử
+                      </button>
+                      <button
+                        class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                        onclick="lockCard('A1205002')"
+                      >
+                        Khóa thẻ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition-colors"
+                  onclick="requestNewCard()"
+                >
+                  <i class="fas fa-plus mr-2"></i>Đăng ký thẻ mới
+                </button>
+              </div>
+
+              <!-- Account Settings -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h4 class="font-semibold mb-4">Cài đặt tài khoản</h4>
+                <div class="space-y-3">
+                  <button
+                    class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-between"
+                    onclick="changePassword()"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-key text-gray-500"></i>
+                      <span>Đổi mật khẩu</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </button>
+                  <button
+                    class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-between"
+                    onclick="notificationSettings()"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-bell text-gray-500"></i>
+                      <span>Cài đặt thông báo</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </button>
+                  <button
+                    class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-between"
+                    onclick="twoFactorAuth()"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-shield-alt text-gray-500"></i>
+                      <span>Bảo mật 2 lớp</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <span
+                        class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded"
+                        >Đã bật</span
+                      >
+                      <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                  </button>
+                  <button
+                    class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-between"
+                    onclick="privacySettings()"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-user-shield text-gray-500"></i>
+                      <span>Quyền riêng tư</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div id="payment" class="content-section hidden">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+              Thanh toán trực tuyến
+            </h2>
+            <p class="text-gray-600">
+              Thanh toán các khoản phí một cách nhanh chóng và tiện lợi
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+              <!-- Outstanding Bills -->
+              <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                  <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                  Hóa đơn chưa thanh toán
+                </h3>
+                <div class="space-y-4">
+                  <div class="border-2 border-red-200 bg-red-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 class="font-medium text-red-700">
+                          Hóa đơn tháng 12/2024
+                        </h4>
+                        <p class="text-sm text-red-600">
+                          Hạn thanh toán: 15/12/2024
+                        </p>
+                        <p class="text-xs text-red-500">⚠️ Quá hạn 5 ngày</p>
+                      </div>
+                      <div class="flex space-x-2">
+                        <span
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"
+                          >Quá hạn</span
+                        >
+                        <button
+                          class="text-blue-600 hover:text-blue-800 text-xs"
+                          onclick="viewBillDetail('202412')"
+                        >
+                          <i class="fas fa-eye"></i> Chi tiết
+                        </button>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span>Phí quản lý (75m²)</span>
+                        <span>1,125,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>Phí gửi xe máy</span>
+                        <span>100,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>Phí internet</span>
+                        <span>200,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between text-red-600">
+                        <span>Phí chậm thanh toán (5%)</span>
+                        <span>71,250 VNĐ</span>
+                      </div>
+                      <hr class="my-2 border-red-200" />
+                      <div class="flex justify-between font-semibold text-lg">
+                        <span>Tổng cộng</span>
+                        <span class="text-red-600">1,496,250 VNĐ</span>
+                      </div>
+                    </div>
+                    <div class="flex space-x-2 mt-4">
+                      <button
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-medium transition-colors"
+                        onclick="openPaymentModal('1496250', 'Hóa đơn tháng 12/2024')"
+                      >
+                        <i class="fas fa-credit-card mr-2"></i>Thanh toán ngay
+                      </button>
+                      <button
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors"
+                        onclick="downloadBill('202412')"
+                      >
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    class="border-2 border-yellow-200 bg-yellow-50 p-4 rounded-lg"
+                  >
+                    <div class="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 class="font-medium text-yellow-700">
+                          Hóa đơn tháng 1/2025
+                        </h4>
+                        <p class="text-sm text-yellow-600">
+                          Hạn thanh toán: 15/01/2025
+                        </p>
+                        <p class="text-xs text-yellow-500">⏰ Còn 20 ngày</p>
+                      </div>
+                      <div class="flex space-x-2">
+                        <span
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
+                          >Sắp đến hạn</span
+                        >
+                        <button
+                          class="text-blue-600 hover:text-blue-800 text-xs"
+                          onclick="viewBillDetail('202501')"
+                        >
+                          <i class="fas fa-eye"></i> Chi tiết
+                        </button>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span>Phí quản lý (75m²)</span>
+                        <span>1,125,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>Phí gửi xe máy</span>
+                        <span>100,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>Phí internet</span>
+                        <span>200,000 VNĐ</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>Phí gym</span>
+                        <span>300,000 VNĐ</span>
+                      </div>
+                      <hr class="my-2 border-yellow-200" />
+                      <div class="flex justify-between font-semibold text-lg">
+                        <span>Tổng cộng</span>
+                        <span>1,725,000 VNĐ</span>
+                      </div>
+                    </div>
+                    <div class="flex space-x-2 mt-4">
+                      <button
+                        class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg font-medium transition-colors"
+                        onclick="openPaymentModal('1725000', 'Hóa đơn tháng 1/2025')"
+                      >
+                        <i class="fas fa-credit-card mr-2"></i>Thanh toán
+                      </button>
+                      <button
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors"
+                        onclick="downloadBill('202501')"
+                      >
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment History -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-lg font-semibold">Lịch sử thanh toán</h3>
+                  <div class="flex space-x-2">
+                    <select
+                      class="px-3 py-1 border border-gray-300 rounded text-sm"
+                      onchange="filterPaymentHistory(this.value)"
+                    >
+                      <option value="2024">Năm 2024</option>
+                      <option value="2023">Năm 2023</option>
+                      <option value="all">Tất cả</option>
+                    </select>
+                    <button
+                      class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                      onclick="exportPaymentHistory()"
+                    >
+                      <i class="fas fa-file-excel mr-1"></i>Xuất Excel
+                    </button>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Tháng
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Số tiền
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Ngày thanh toán
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Phương thức
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Trạng thái
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >
+                          Thao tác
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                      <tr>
+                        <td class="px-4 py-3 text-sm font-medium">11/2024</td>
+                        <td class="px-4 py-3 text-sm">1,425,000 VNĐ</td>
+                        <td class="px-4 py-3 text-sm">12/11/2024</td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
+                            >VNPay</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+                            >Thành công</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <button
+                            class="text-blue-600 hover:text-blue-800 mr-2"
+                            onclick="viewReceipt('202411')"
+                          >
+                            <i class="fas fa-receipt"></i>
+                          </button>
+                          <button
+                            class="text-green-600 hover:text-green-800"
+                            onclick="downloadReceipt('202411')"
+                          >
+                            <i class="fas fa-download"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-3 text-sm font-medium">10/2024</td>
+                        <td class="px-4 py-3 text-sm">1,425,000 VNĐ</td>
+                        <td class="px-4 py-3 text-sm">10/10/2024</td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+                            >MoMo</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+                            >Thành công</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <button
+                            class="text-blue-600 hover:text-blue-800 mr-2"
+                            onclick="viewReceipt('202410')"
+                          >
+                            <i class="fas fa-receipt"></i>
+                          </button>
+                          <button
+                            class="text-green-600 hover:text-green-800"
+                            onclick="downloadReceipt('202410')"
+                          >
+                            <i class="fas fa-download"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-3 text-sm font-medium">09/2024</td>
+                        <td class="px-4 py-3 text-sm">1,425,000 VNĐ</td>
+                        <td class="px-4 py-3 text-sm">08/09/2024</td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800"
+                            >ZaloPay</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <span
+                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+                            >Thành công</span
+                          >
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                          <button
+                            class="text-blue-600 hover:text-blue-800 mr-2"
+                            onclick="viewReceipt('202409')"
+                          >
+                            <i class="fas fa-receipt"></i>
+                          </button>
+                          <button
+                            class="text-green-600 hover:text-green-800"
+                            onclick="downloadReceipt('202409')"
+                          >
+                            <i class="fas fa-download"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <!-- Payment Methods -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h4 class="font-semibold mb-4">Phương thức thanh toán</h4>
+                <div class="space-y-3">
+                  <div
+                    class="payment-method p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer"
+                    onclick="selectPaymentMethod('vnpay')"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fab fa-cc-visa text-blue-600 text-2xl"></i>
+                      <div>
+                        <p class="font-medium text-blue-700">VNPay</p>
+                        <p class="text-sm text-blue-600">
+                          Thanh toán qua ngân hàng
+                        </p>
+                        <p class="text-xs text-blue-500">
+                          Phí: 0% - Nhanh chóng
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="payment-method p-4 border-2 border-green-200 bg-green-50 rounded-lg cursor-pointer"
+                    onclick="selectPaymentMethod('momo')"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-mobile-alt text-green-600 text-2xl"></i>
+                      <div>
+                        <p class="font-medium text-green-700">MoMo</p>
+                        <p class="text-sm text-green-600">Ví điện tử MoMo</p>
+                        <p class="text-xs text-green-500">Phí: 0% - Tiện lợi</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="payment-method p-4 border-2 border-purple-200 bg-purple-50 rounded-lg cursor-pointer"
+                    onclick="selectPaymentMethod('zalopay')"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <i class="fas fa-wallet text-purple-600 text-2xl"></i>
+                      <div>
+                        <p class="font-medium text-purple-700">ZaloPay</p>
+                        <p class="text-sm text-purple-600">
+                          Ví điện tử ZaloPay
+                        </p>
+                        <p class="text-xs text-purple-500">Phí: 0% - An toàn</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg text-sm transition-colors"
+                  onclick="managePaymentMethods()"
+                >
+                  <i class="fas fa-cog mr-2"></i>Quản lý phương thức
+                </button>
+              </div>
+
+              <!-- Auto Payment -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h4 class="font-semibold mb-4">Thanh toán tự động</h4>
+                <div class="space-y-4">
+                  <div
+                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div>
+                      <p class="font-medium">Kích hoạt thanh toán tự động</p>
+                      <p class="text-sm text-gray-600">
+                        Tự động thanh toán vào ngày 10 hàng tháng
+                      </p>
+                    </div>
+                    <label
+                      class="relative inline-flex items-center cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        class="sr-only peer"
+                        onchange="toggleAutoPayment(this)"
+                      />
+                      <div
+                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                      ></div>
+                    </label>
+                  </div>
+                  <div class="space-y-3">
+                    <div>
+                      <label
+                        class="text-sm font-medium text-gray-700 block mb-1"
+                        >Ngày thanh toán hàng tháng</label
+                      >
+                      <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      >
+                        <option value="5">Ngày 5</option>
+                        <option value="10" selected>Ngày 10</option>
+                        <option value="15">Ngày 15</option>
+                        <option value="20">Ngày 20</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label
+                        class="text-sm font-medium text-gray-700 block mb-1"
+                        >Phương thức mặc định</label
+                      >
+                      <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      >
+                        <option value="vnpay" selected>VNPay</option>
+                        <option value="momo">MoMo</option>
+                        <option value="zalopay">ZaloPay</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                    <p class="font-medium text-blue-700 mb-1">
+                      Lợi ích thanh toán tự động:
+                    </p>
+                    <ul class="text-blue-600 space-y-1">
+                      <li>• Không bao giờ quên thanh toán</li>
+                      <li>• Tránh phí chậm thanh toán</li>
+                      <li>• Tiết kiệm thời gian</li>
+                      <li>• Nhận thông báo trước 3 ngày</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Summary -->
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h4 class="font-semibold mb-4">Tóm tắt tài chính</h4>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600"
+                      >Tổng đã thanh toán năm 2024</span
+                    >
+                    <span class="font-semibold text-green-600"
+                      >15,675,000 VNĐ</span
+                    >
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Còn nợ</span>
+                    <span class="font-semibold text-red-600"
+                      >3,221,250 VNĐ</span
+                    >
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600"
+                      >Phí trung bình/tháng</span
+                    >
+                    <span class="font-semibold">1,425,000 VNĐ</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600"
+                      >Tiết kiệm được (thanh toán đúng hạn)</span
+                    >
+                    <span class="font-semibold text-green-600"
+                      >285,000 VNĐ</span
+                    >
+                  </div>
+                  <hr class="my-2" />
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">Dự kiến tháng tới</span>
+                    <span class="font-semibold text-blue-600"
+                      >1,725,000 VNĐ</span
+                    >
+                  </div>
+                </div>
+                <button
+                  class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition-colors"
+                  onclick="viewDetailedReport()"
+                >
+                  <i class="fas fa-chart-line mr-2"></i>Xem báo cáo chi tiết
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services Section -->
+        <div id="services" class="content-section hidden">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+              Đăng ký Dịch vụ
+            </h2>
+            <p class="text-gray-600">
+              Đăng ký các dịch vụ tiện ích trong chung cư
+            </p>
+          </div>
+
+          <!-- Services Grid -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          >
+            <!-- Motorcycle Parking -->
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <div class="flex items-center space-x-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-motorcycle text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Gửi xe máy</h3>
+                  <p class="text-sm text-gray-600">100,000 VNĐ/tháng</p>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">
+                Dịch vụ gửi xe máy an toàn, có camera giám sát 24/7 tại tầng hầm
+                B1, B2
+              </p>
+              <div class="space-y-2 text-sm mb-4">
+                <p class="flex items-center">
+                  <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>Tầng
+                  B1, B2
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-clock text-gray-400 mr-2"></i>24/7
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-shield-alt text-gray-400 mr-2"></i>Bảo hiểm
+                  toàn diện
+                </p>
+              </div>
+              <button
+                class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors"
+              >
+                <i class="fas fa-check mr-2"></i>Đang sử dụng
+              </button>
+            </div>
+
+            <!-- Car Parking -->
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <div class="flex items-center space-x-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-car text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Gửi ô tô</h3>
+                  <p class="text-sm text-gray-600">1,200,000 VNĐ/tháng</p>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">
+                Chỗ đậu xe ô tô riêng biệt, an toàn tuyệt đối với hệ thống bảo
+                mật hiện đại
+              </p>
+              <div class="space-y-2 text-sm mb-4">
+                <p class="flex items-center">
+                  <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>Tầng
+                  B1 - Khu A
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-clock text-gray-400 mr-2"></i>24/7
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-car-wash text-gray-400 mr-2"></i>Rửa xe miễn
+                  phí 2 lần/tháng
+                </p>
+              </div>
+              <button
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors"
+                onclick="registerService('car-parking')"
+              >
+                <i class="fas fa-plus mr-2"></i>Đăng ký ngay
+              </button>
+            </div>
+
+            <!-- Internet -->
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <div class="flex items-center space-x-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+                >
+                  <i class="fas fa-wifi text-green-600 text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Internet cao cấp</h3>
+                  <p class="text-sm text-gray-600">200,000 VNĐ/tháng</p>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">
+                Internet tốc độ cao 100Mbps, ổn định 24/7 với hỗ trợ kỹ thuật
+                chuyên nghiệp
+              </p>
+              <div class="space-y-2 text-sm mb-4">
+                <p class="flex items-center">
+                  <i class="fas fa-tachometer-alt text-gray-400 mr-2"></i
+                  >100Mbps
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-headset text-gray-400 mr-2"></i>Hỗ trợ 24/7
+                </p>
+                <p class="flex items-center">
+                  <i class="fas fa-tools text-gray-400 mr-2"></i>Lắp đặt miễn
+                  phí
+                </p>
+              </div>
+              <button
+                class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors"
+              >
+                <i class="fas fa-check mr-2"></i>Đang sử dụng
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apartment Info Section -->
+        <div id="apartment" class="content-section hidden">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+              Thông tin căn hộ
+            </h2>
+            <p class="text-gray-600">Chi tiết về căn hộ và hợp đồng của bạn</p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-xl font-semibold">Căn hộ A1205</h3>
+                <p class="text-gray-600">
+                  Tòa A - Tầng 12 - Vinhomes Central Park
+                </p>
+              </div>
+              <span
+                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium"
+                >Đang sở hữu</span
+              >
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-semibold mb-4 text-gray-800">
+                  Thông số căn hộ
+                </h4>
+                <div class="space-y-4">
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-ruler-combined text-blue-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Diện tích</p>
+                      <p class="font-medium">75 m²</p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-bed text-green-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Phòng ngủ</p>
+                      <p class="font-medium">2 phòng</p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-bath text-purple-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Phòng tắm</p>
+                      <p class="font-medium">2 phòng</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-semibold mb-4 text-gray-800">
+                  Thông tin hợp đồng
+                </h4>
+                <div class="space-y-4">
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-calendar text-blue-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Ngày mua</p>
+                      <p class="font-medium">15/03/2020</p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-money-bill-wave text-green-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Giá mua</p>
+                      <p class="font-medium">2.5 tỷ VNĐ</p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  >
+                    <i class="fas fa-file-contract text-purple-500"></i>
+                    <div>
+                      <p class="text-sm text-gray-600">Số hợp đồng</p>
+                      <p class="font-medium">HD2020001205</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+      <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 fade-in">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Thanh toán hóa đơn</h3>
+            <button
+              onclick="closePaymentModal()"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mb-4">
+            <p class="text-sm text-gray-600">Hóa đơn</p>
+            <p id="billName" class="font-medium"></p>
+            <p class="text-sm text-gray-600 mt-2">Số tiền</p>
+            <p id="billAmount" class="text-2xl font-bold text-red-600"></p>
+          </div>
+          <div class="mb-4">
+            <label class="text-sm font-medium text-gray-700 block mb-2"
+              >Chọn phương thức thanh toán</label
+            >
+            <div class="space-y-2">
+              <label
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="vnpay"
+                  class="mr-3"
+                  checked
+                />
+                <i class="fab fa-cc-visa text-blue-600 mr-2"></i>
+                <span>VNPay</span>
+              </label>
+              <label
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="momo"
+                  class="mr-3"
+                />
+                <i class="fas fa-mobile-alt text-green-600 mr-2"></i>
+                <span>MoMo</span>
+              </label>
+              <label
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="zalopay"
+                  class="mr-3"
+                />
+                <i class="fas fa-wallet text-purple-600 mr-2"></i>
+                <span>ZaloPay</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex space-x-3">
+            <button
+              onclick="processPayment()"
+              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition-colors"
+            >
+              Thanh toán ngay
+            </button>
+            <button
+              onclick="closePaymentModal()"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 rounded-lg transition-colors"
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Set current date
+      document.getElementById("currentDate").textContent =
+        new Date().toLocaleDateString("vi-VN");
+
+      // Navigation functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const navItems = document.querySelectorAll(".nav-item");
+        const contentSections = document.querySelectorAll(".content-section");
+        const menuToggle = document.getElementById("menuToggle");
+        const sidebar = document.getElementById("sidebar");
+
+        // Navigation
+        navItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            const targetSection = this.getAttribute("data-section");
+            showSection(targetSection);
+
+            // Update active nav item
+            navItems.forEach((nav) =>
+              nav.classList.remove("bg-blue-50", "text-blue-700", "font-medium")
+            );
+            navItems.forEach((nav) => nav.classList.add("hover:bg-blue-50"));
+            this.classList.add("bg-blue-50", "text-blue-700", "font-medium");
+            this.classList.remove("hover:bg-blue-50");
+          });
+        });
+
+        // Mobile menu toggle
+        menuToggle.addEventListener("click", function () {
+          sidebar.classList.toggle("sidebar-hidden");
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener("click", function (e) {
+          if (
+            window.innerWidth < 768 &&
+            !sidebar.contains(e.target) &&
+            !menuToggle.contains(e.target)
+          ) {
+            sidebar.classList.add("sidebar-hidden");
+          }
+        });
+      });
+
+      function showSection(sectionId) {
+        const contentSections = document.querySelectorAll(".content-section");
+        contentSections.forEach((section) => {
+          section.classList.add("hidden");
+        });
+        document.getElementById(sectionId).classList.remove("hidden");
+      }
+
+      // Profile functionality
+      document
+        .getElementById("editProfileBtn")
+        .addEventListener("click", function () {
+          document.getElementById("profileView").classList.add("hidden");
+          document.getElementById("profileEdit").classList.remove("hidden");
+          this.style.display = "none";
+        });
+
+      document
+        .getElementById("cancelEditBtn")
+        .addEventListener("click", function () {
+          document.getElementById("profileEdit").classList.add("hidden");
+          document.getElementById("profileView").classList.remove("hidden");
+          document.getElementById("editProfileBtn").style.display = "block";
+        });
+
+      function saveProfile(event) {
+        event.preventDefault();
+        // Simulate saving
+        setTimeout(() => {
+          alert("Thông tin đã được cập nhật thành công!");
+          document.getElementById("profileEdit").classList.add("hidden");
+          document.getElementById("profileView").classList.remove("hidden");
+          document.getElementById("editProfileBtn").style.display = "block";
+        }, 1000);
+      }
+
+      function addFamilyMember() {
+        alert("Chức năng thêm thành viên gia đình sẽ được cập nhật sớm!");
+      }
+
+      function editFamilyMember(id) {
+        alert(`Chỉnh sửa thông tin thành viên ${id}`);
+      }
+
+      function deleteFamilyMember(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa thành viên này?")) {
+          alert(`Đã xóa thành viên ${id}`);
+        }
+      }
+
+      function viewCardHistory(cardId) {
+        alert(`Xem lịch sử sử dụng thẻ ${cardId}`);
+      }
+
+      function lockCard(cardId) {
+        if (confirm("Bạn có chắc chắn muốn khóa thẻ này?")) {
+          alert(`Đã khóa thẻ ${cardId}`);
+        }
+      }
+
+      function requestNewCard() {
+        alert(
+          "Yêu cầu cấp thẻ mới đã được gửi. Ban quản lý sẽ liên hệ trong 24h."
+        );
+      }
+
+      function changePassword() {
+        alert("Chức năng đổi mật khẩu sẽ được cập nhật sớm!");
+      }
+
+      function notificationSettings() {
+        alert("Cài đặt thông báo sẽ được cập nhật sớm!");
+      }
+
+      function twoFactorAuth() {
+        alert("Cài đặt bảo mật 2 lớp sẽ được cập nhật sớm!");
+      }
+
+      function privacySettings() {
+        alert("Cài đặt quyền riêng tư sẽ được cập nhật sớm!");
+      }
+
+      // Payment functionality
+      function openPaymentModal(amount, billName) {
+        document.getElementById("billAmount").textContent =
+          parseInt(amount).toLocaleString("vi-VN") + " VNĐ";
+        document.getElementById("billName").textContent = billName;
+        document.getElementById("paymentModal").classList.add("show");
+      }
+
+      function closePaymentModal() {
+        document.getElementById("paymentModal").classList.remove("show");
+      }
+
+      function processPayment() {
+        const selectedMethod = document.querySelector(
+          'input[name="paymentMethod"]:checked'
+        ).value;
+        const amount = document.getElementById("billAmount").textContent;
+
+        alert(
+          `Đang chuyển hướng đến ${selectedMethod.toUpperCase()} để thanh toán ${amount}...`
+        );
+        closePaymentModal();
+
+        // Simulate payment success
+        setTimeout(() => {
+          alert("Thanh toán thành công! Hóa đơn đã được cập nhật.");
+        }, 2000);
+      }
+
+      function viewBillDetail(billId) {
+        alert(`Xem chi tiết hóa đơn ${billId}`);
+      }
+
+      function downloadBill(billId) {
+        alert(`Đang tải xuống hóa đơn ${billId}...`);
+      }
+
+      function filterPaymentHistory(year) {
+        alert(`Lọc lịch sử thanh toán năm ${year}`);
+      }
+
+      function exportPaymentHistory() {
+        alert("Đang xuất file Excel...");
+      }
+
+      function viewReceipt(billId) {
+        alert(`Xem biên lai thanh toán ${billId}`);
+      }
+
+      function downloadReceipt(billId) {
+        alert(`Đang tải xuống biên lai ${billId}...`);
+      }
+
+      function selectPaymentMethod(method) {
+        alert(`Đã chọn phương thức thanh toán: ${method.toUpperCase()}`);
+      }
+
+      function managePaymentMethods() {
+        alert("Quản lý phương thức thanh toán sẽ được cập nhật sớm!");
+      }
+
+      function toggleAutoPayment(checkbox) {
+        if (checkbox.checked) {
+          alert("Đã bật thanh toán tự động!");
+        } else {
+          alert("Đã tắt thanh toán tự động!");
+        }
+      }
+
+      function viewDetailedReport() {
+        alert("Báo cáo chi tiết sẽ được cập nhật sớm!");
+      }
+
+      // Service functionality
+      function registerService(serviceId) {
+        alert(`Đăng ký dịch vụ ${serviceId} thành công!`);
+      }
+
+      // Close modal when clicking outside
+      document
+        .getElementById("paymentModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closePaymentModal();
+          }
+        });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'98732ac0502809c4',t:'MTc1OTIyOTUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

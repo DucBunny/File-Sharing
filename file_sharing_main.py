@@ -8,6 +8,7 @@ import sys
 import time
 import hashlib
 import datetime
+import shutil # Thư viện để copy file/folder vật lý
 
 # --- CẤU HÌNH LOAD THƯ VIỆN C ---
 lib_name = "./network_lib.so"
@@ -95,7 +96,8 @@ class DBManager:
                     host="localhost",
                     user="fileuser",        
                     password="FilePassword123", 
-                    database="file_system_db"
+                    database="file_system_db",
+                    port=33061 # Sử dụng cổng MySQL tùy chỉnh 33061
                 )
                 print("[DB] Kết nối MySQL thành công.")
             except Exception as e:
@@ -119,7 +121,7 @@ class DBManager:
         cursor.close()
         return user
 
-    # --- MỚI: HÀM ĐĂNG KÝ USER ---
+    # Hàm Đăng ký User
     def register_user(self, username, password, fullname, email):
         if not self.conn: return False, "Lỗi kết nối CSDL"
         cursor = self.get_cursor()
@@ -175,6 +177,7 @@ class DBManager:
         cursor.close()
         return nodes
 
+    # Hàm tạo node mới
     def create_node(self, owner_id, name, type, parent_id=None, size=0):
         if not self.conn: return 999
         cursor = self.get_cursor()
@@ -182,6 +185,7 @@ class DBManager:
         cursor.execute(sql, (owner_id, name, type, parent_id, size))
         self.conn.commit()
         node_id = cursor.lastrowid
+        # Thêm permission mặc định
         cursor.execute("INSERT INTO permissions (node_id) VALUES (%s)", (node_id,))
         self.conn.commit()
         cursor.close()
@@ -200,6 +204,120 @@ class DBManager:
             return True
         except:
             return False
+            
+    # Hàm KIỂM TRA VÀ LẤY CHI TIẾT NODE 
+    def get_node_details(self, node_id, user_id):
+        if not self.conn: return None
+        cursor = self.get_cursor()
+        query = """
+            SELECT n.*, u.username as owner_name, 
+                   (n.owner_id = %s) as is_owner,
+                   sn.permission as share_perm
+            FROM nodes n 
+            JOIN users u ON n.owner_id = u.id
+            LEFT JOIN shared_nodes sn ON n.id = sn.node_id AND sn.shared_with_user = %s
+            WHERE n.id = %s
+        """
+        cursor.execute(query, (user_id, user_id, node_id))
+        node = cursor.fetchone()
+        cursor.close()
+        
+        if node:
+            if node['is_owner']:
+                node['can_write'] = True
+            elif node['share_perm'] in ('write', 'full'):
+                node['can_write'] = True
+            else:
+                node['can_write'] = False
+                
+        return node
+
+    # Hàm tiện ích để check quyền ghi (rename/delete)
+    def check_write_permission(self, node_id, user_id):
+        node = self.get_node_details(node_id, user_id)
+        return node and node.get('can_write', False)
+
+    # Hàm SỬA TÊN NODE 
+    def rename_node(self, node_id, new_name):
+        if not self.conn: return False
+        cursor = self.get_cursor()
+        try:
+            sql = "UPDATE nodes SET name = %s WHERE id = %s"
+            cursor.execute(sql, (new_name, node_id))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"DB Error renaming: {e}")
+            return False
+
+    # Hàm XÓA NODE 
+    def delete_node(self, node_id):
+        if not self.conn: return False
+        cursor = self.get_cursor()
+        try:
+            sql = "DELETE FROM nodes WHERE id = %s"
+            cursor.execute(sql, (node_id,))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"DB Error deleting: {e}")
+            return False
+            
+    # --- BỔ SUNG: HÀM SAO CHÉP NODE (RECURSIVE) ---
+    def copy_node_recursive(self, original_id, new_owner_id, new_parent_id, is_copy_op=True):
+        cursor = self.get_cursor()
+        cursor.execute("SELECT * FROM nodes WHERE id = %s", (original_id,))
+        original_node = cursor.fetchone()
+        
+        if not original_node:
+            return None # Node gốc không tồn tại
+
+        # 1. Tạo node mới (bản sao) trong CSDL
+        new_node_id = self.create_node(
+            owner_id=new_owner_id,
+            name=original_node['name'],
+            type=original_node['type'],
+            parent_id=new_parent_id,
+            size=original_node['size']
+        )
+        
+        # 2. Xử lý file vật lý hoặc thư mục con
+        if original_node['type'] == 'file':
+            # Sao chép file vật lý: original_id -> new_node_id
+            src_path = os.path.join(SERVER_ROOT, str(original_id))
+            dest_path = os.path.join(SERVER_ROOT, str(new_node_id))
+            try:
+                if os.path.exists(src_path):
+                    shutil.copy2(src_path, dest_path)
+            except Exception as e:
+                print(f"Lỗi sao chép file vật lý {src_path} sang {dest_path}: {e}")
+                # Nếu không copy được file, vẫn giữ node trong DB, nhưng log lỗi.
+                
+        elif original_node['type'] == 'folder':
+            # Nếu là thư mục, sao chép đệ quy các node con
+            cursor.execute("SELECT id FROM nodes WHERE parent_id = %s", (original_id,))
+            child_ids = [row['id'] for row in cursor.fetchall()]
+            
+            for child_id in child_ids:
+                # Gọi đệ quy: new_node_id là parent_id mới
+                self.copy_node_recursive(child_id, new_owner_id, new_node_id, is_copy_op)
+                
+        cursor.close()
+        return new_node_id
+
+    # --- BỔ SUNG: HÀM DI CHUYỂN NODE (Chỉ thay đổi Parent ID) ---
+    def move_node(self, node_id, new_parent_id):
+        if not self.conn: return False
+        cursor = self.get_cursor()
+        try:
+            sql = "UPDATE nodes SET parent_id = %s WHERE id = %s"
+            cursor.execute(sql, (new_parent_id, node_id))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"DB Error moving node: {e}")
+            return False
+
 
 # --- SERVER LOGIC ---
 class FileServer:
@@ -241,7 +359,7 @@ class FileServer:
                     else:
                         res = {"status": "fail", "message": "Sai tên đăng nhập hoặc mật khẩu"}
 
-                # --- MỚI: XỬ LÝ REGISTER ---
+                # Xử lý REGISTER
                 elif cmd == 'REGISTER':
                     ok, msg = self.db.register_user(req['username'], req['password'], req['fullname'], req['email'])
                     res = {"status": "success" if ok else "fail", "message": msg}
@@ -289,6 +407,85 @@ class FileServer:
                         ok = self.db.share_node(req['node_id'], req['target_username'], req['permission'])
                         if ok: res = {"status": "success", "message": "Đã chia sẻ thành công"}
                         else: res = {"status": "fail", "message": "Người dùng không tồn tại"}
+                
+                # XỬ LÝ ĐỔI TÊN NODE 
+                elif cmd == 'RENAME_NODE':
+                    node_id = req['node_id']
+                    new_name = req['new_name']
+                    if not current_user or not self.db.check_write_permission(node_id, current_user['id']):
+                        res = {"status": "fail", "message": "Không có quyền sửa tên"}
+                    elif self.db.rename_node(node_id, new_name):
+                        res = {"status": "success", "message": "Đổi tên thành công"}
+                    else:
+                        res = {"status": "error", "message": "Lỗi CSDL khi đổi tên"}
+
+                # XỬ LÝ XÓA NODE 
+                elif cmd == 'DELETE_NODE':
+                    node_id = req['node_id']
+                    
+                    if not current_user or not self.db.check_write_permission(node_id, current_user['id']):
+                        res = {"status": "fail", "message": "Không có quyền xóa"}
+                    else:
+                        node_info = self.db.get_node_details(node_id, current_user['id'])
+                        
+                        if not node_info:
+                            res = {"status": "fail", "message": "Node không tồn tại"}
+                        else:
+                            # Xóa file vật lý trên Server nếu là file
+                            if node_info['type'] == 'file':
+                                phy_path = os.path.join(SERVER_ROOT, str(node_id))
+                                if os.path.exists(phy_path):
+                                    try:
+                                        os.remove(phy_path)
+                                    except Exception as e:
+                                        print(f"Lỗi xóa file vật lý: {e}")
+                                        
+                            # Xóa node trong DB
+                            if self.db.delete_node(node_id):
+                                res = {"status": "success", "message": "Xóa thành công"}
+                            else:
+                                res = {"status": "error", "message": "Lỗi CSDL khi xóa"}
+
+                # --- BỔ SUNG: XỬ LÝ SAO CHÉP NODE (COPY) ---
+                elif cmd == 'COPY_NODE':
+                    node_id = req['node_id']
+                    target_parent_id = req.get('target_parent_id')
+                    
+                    # Kiểm tra quyền: Người dùng hiện tại phải là chủ sở hữu node hoặc có quyền đọc/ghi
+                    # Tuy nhiên, để đơn giản, ta chỉ kiểm tra node có tồn tại và thuộc sở hữu không.
+                    node_info = self.db.get_node_details(node_id, current_user['id'])
+                    if not node_info:
+                         res = {"status": "fail", "message": "Node gốc không tồn tại."}
+                    else:
+                        # Thực hiện sao chép đệ quy
+                        new_id = self.db.copy_node_recursive(node_id, current_user['id'], target_parent_id)
+                        if new_id:
+                            res = {"status": "success", "message": "Sao chép thành công."}
+                        else:
+                            res = {"status": "error", "message": "Lỗi sao chép trong DB hoặc file vật lý."}
+
+                # --- BỔ SUNG: XỬ LÝ DI CHUYỂN NODE (MOVE/CUT) ---
+                elif cmd == 'MOVE_NODE':
+                    node_id = req['node_id']
+                    target_parent_id = req.get('target_parent_id')
+                    
+                    # 1. Kiểm tra quyền GHI (Write) trên node gốc
+                    if not current_user or not self.db.check_write_permission(node_id, current_user['id']):
+                        res = {"status": "fail", "message": "Không có quyền di chuyển node này."}
+                    else:
+                        # 2. Kiểm tra node có tồn tại
+                        node_info = self.db.get_node_details(node_id, current_user['id'])
+                        if not node_info:
+                            res = {"status": "fail", "message": "Node không tồn tại."}
+                        # 3. Kiểm tra Di chuyển vào chính nó (ngăn chặn lỗi logic)
+                        elif node_id == target_parent_id:
+                            res = {"status": "fail", "message": "Không thể di chuyển vào chính nó."}
+                        # 4. Thực hiện di chuyển (chỉ cập nhật parent_id trong DB)
+                        elif self.db.move_node(node_id, target_parent_id):
+                            res = {"status": "success", "message": "Di chuyển thành công."}
+                        else:
+                            res = {"status": "error", "message": "Lỗi CSDL khi di chuyển."}
+
 
                 c_send_json(client_fd, res)
         except Exception as e:
@@ -307,6 +504,10 @@ class DriveGUI:
         self.current_user_id = None
         self.current_parent_id = None
         self.path_stack = [] 
+
+        # --- BỔ SUNG: CLIPBOARD CHO COPY/CUT ---
+        self.clipboard_node = None     # Chứa thông tin node được Copy/Cut
+        self.clipboard_action = None   # 'copy' hoặc 'move'
         
         self.setup_login()
 
@@ -321,9 +522,11 @@ class DriveGUI:
             messagebox.showerror("Lỗi", "Mất kết nối server")
             return None
         if c_send_json(self.sock_fd, data):
+            # Đảm bảo nhận phản hồi sau khi gửi
             return c_recv_json(self.sock_fd)
         return None
 
+    # ... (Các hàm setup_login, do_login, setup_drive_ui, navigate_to_root, enter_folder, go_back_to, update_breadcrumbs, refresh_nodes, draw_node_item, on_node_click giữ nguyên)
     # --- UI: LOGIN ---
     def setup_login(self):
         self.clear_ui()
@@ -349,7 +552,7 @@ class DriveGUI:
         tk.Button(card, text="Chưa có tài khoản? Đăng ký ngay", font=("Segoe UI", 10), bg="white", fg="#1a73e8", 
                  bd=0, cursor="hand2", command=self.setup_register).pack(fill=tk.X, pady=10)
 
-    # --- MỚI: UI REGISTER ---
+    # UI REGISTER
     def setup_register(self):
         self.clear_ui()
         frame = tk.Frame(self.root, bg="#f0f2f5")
@@ -517,18 +720,79 @@ class DriveGUI:
         else:
             messagebox.showinfo("File Info", f"File: {node['name']}\nSize: {node['size']} bytes\nOwner: {node['owner_name']}")
 
+    # --- CẬP NHẬT: MENU NGỮ CẢNH (CHUỘT PHẢI) ---
     def show_context_menu(self, event, node):
         menu = tk.Menu(self.root, tearoff=0)
+        
+        # Thao tác cơ bản
+        menu.add_command(label="Sửa tên", command=lambda: self.rename_node_dialog(node))
+        menu.add_command(label="Xóa", command=lambda: self.delete_node_action(node))
+        menu.add_separator()
+        
+        # Thao tác Clipboard
+        menu.add_command(label="Sao chép (Copy)", command=lambda: self.set_clipboard(node, 'copy'))
+        menu.add_command(label="Cắt (Cut)", command=lambda: self.set_clipboard(node, 'move'))
+
+        # Thêm nút Paste chỉ khi clipboard có nội dung
+        if self.clipboard_node:
+            action_text = "Dán (Paste Copy)" if self.clipboard_action == 'copy' else "Dán (Paste Cut)"
+            menu.add_command(label=action_text, command=self.paste_action)
+            menu.add_separator()
+        
         if node['type'] == 'file':
             menu.add_command(label="Download", command=lambda: self.download_node(node))
+            
         menu.add_command(label="Chia sẻ", command=lambda: self.share_dialog(node))
         
-        # SỬ DỤNG tk_popup THAY VÌ post ĐỂ TRÁNH LỖI FOCUS/TREO MENU
         try:
             menu.tk_popup(event.x_root, event.y_root)
         finally:
             menu.grab_release()
 
+    def set_clipboard(self, node, action):
+        self.clipboard_node = node
+        self.clipboard_action = action
+        messagebox.showinfo("Clipboard", f"Đã {action} node: {node['name']}")
+        
+    def paste_action(self):
+        if not self.clipboard_node:
+            messagebox.showerror("Lỗi", "Clipboard trống.")
+            return
+
+        if self.clipboard_action == 'copy':
+            command = "COPY_NODE"
+            message = "Sao chép"
+        elif self.clipboard_action == 'move':
+            command = "MOVE_NODE"
+            message = "Di chuyển"
+        else:
+            return
+
+        node_to_paste = self.clipboard_node
+        target_parent_id = self.current_parent_id
+        
+        req = {
+            "command": command,
+            "node_id": node_to_paste['id'],
+            "target_parent_id": target_parent_id
+        }
+        
+        res = self.send_req(req)
+        
+        if res and res['status'] == 'success':
+            messagebox.showinfo("Thành công", f"{message} thành công.")
+            
+            # Xóa clipboard sau khi dán thành công (chỉ cho Cut)
+            if self.clipboard_action == 'move':
+                self.clipboard_node = None
+                self.clipboard_action = None
+                
+            self.refresh_nodes()
+        else:
+            messagebox.showerror("Thất bại", res.get('message', f"{message} thất bại."))
+
+
+    # --- CÁC HÀM KHÁC ---
     def show_create_menu(self):
         menu = tk.Menu(self.root, tearoff=0)
         menu.add_command(label="Tạo Thư Mục", command=self.create_folder)
@@ -537,7 +801,6 @@ class DriveGUI:
         x = self.root.winfo_rootx() + 50
         y = self.root.winfo_rooty() + 150
         
-        # SỬ DỤNG tk_popup THAY VÌ post
         try:
             menu.tk_popup(x, y)
         finally:
@@ -550,7 +813,40 @@ class DriveGUI:
             if res and res['status'] == 'success':
                 self.refresh_nodes()
 
-    # --- UPLOAD ĐÃ SỬA LỖI ---
+    # HÀM ĐỔI TÊN
+    def rename_node_dialog(self, node):
+        new_name = simpledialog.askstring("Đổi tên", f"Nhập tên mới cho {node['name']}:", initialvalue=node['name'])
+        if new_name and new_name != node['name']:
+            res = self.send_req({
+                "command": "RENAME_NODE", 
+                "node_id": node['id'], 
+                "new_name": new_name
+            })
+            if res and res['status'] == 'success':
+                messagebox.showinfo("Thành công", res['message'])
+                self.refresh_nodes()
+            else:
+                messagebox.showerror("Thất bại", res.get('message', 'Đổi tên thất bại. (Kiểm tra quyền)'))
+
+    # HÀM XÓA 
+    def delete_node_action(self, node):
+        if node['type'] == 'folder':
+            confirm_msg = f"Bạn có chắc muốn xóa thư mục **{node['name']}** không? Mọi nội dung bên trong sẽ bị xóa!"
+        else:
+            confirm_msg = f"Bạn có chắc muốn xóa file **{node['name']}** không?"
+
+        if messagebox.askyesno("Xác nhận xóa", confirm_msg):
+            res = self.send_req({
+                "command": "DELETE_NODE", 
+                "node_id": node['id']
+            })
+            if res and res['status'] == 'success':
+                messagebox.showinfo("Thành công", res['message'])
+                self.refresh_nodes()
+            else:
+                messagebox.showerror("Thất bại", res.get('message', 'Xóa thất bại. (Kiểm tra quyền)'))
+
+    # UPLOAD
     def upload_file(self):
         path = filedialog.askopenfilename()
         if not path: return
@@ -565,18 +861,21 @@ class DriveGUI:
         })
         
         if res_init and res_init['status'] == 'ready':
-            with open(path, 'rb') as f:
-                data = f.read()
-            c_send_bytes(self.sock_fd, data)
-            
-            # Quan trọng: Đọc phản hồi cuối cùng
-            final_res = c_recv_json(self.sock_fd)
-            if final_res and final_res['status'] == 'success':
-                messagebox.showinfo("Thành công", "Upload thành công")
-            else:
-                messagebox.showerror("Lỗi", "Lỗi server khi lưu file")
+            try:
+                with open(path, 'rb') as f:
+                    data = f.read()
+                
+                c_send_bytes(self.sock_fd, data)
+                
+                final_res = c_recv_json(self.sock_fd)
+                if final_res and final_res['status'] == 'success':
+                    messagebox.showinfo("Thành công", "Upload thành công")
+                else:
+                    messagebox.showerror("Lỗi", final_res.get('message', 'Lỗi server khi lưu file'))
 
-            self.refresh_nodes()
+                self.refresh_nodes()
+            except Exception as e:
+                messagebox.showerror("Lỗi", f"Lỗi đọc file: {e}")
 
     def download_node(self, node):
         res = self.send_req({"command": "DOWNLOAD_INIT", "node_id": node['id']})
@@ -585,9 +884,14 @@ class DriveGUI:
             if data:
                 save_path = filedialog.asksaveasfilename(initialfile=node['name'])
                 if save_path:
-                    with open(save_path, 'wb') as f:
-                        f.write(data)
-                    messagebox.showinfo("Done", "Download thành công")
+                    try:
+                        with open(save_path, 'wb') as f:
+                            f.write(data)
+                        messagebox.showinfo("Done", "Download thành công")
+                    except Exception as e:
+                        messagebox.showerror("Lỗi", f"Không thể lưu file: {e}")
+            else:
+                messagebox.showerror("Lỗi", "Lỗi truyền file từ server")
 
     def share_dialog(self, node):
         target = simpledialog.askstring("Chia sẻ", "Nhập username người nhận:")
@@ -603,6 +907,7 @@ class DriveGUI:
 
 if __name__ == "__main__":
     server = FileServer()
+    # Chạy server trong luồng riêng
     t = threading.Thread(target=server.start, daemon=True)
     t.start()
     time.sleep(1)
