@@ -1,0 +1,65 @@
+Table users {
+  id int [pk, increment]                        
+  username varchar(50) [unique, not null]      // tên đăng nhập
+  password_hash varchar(255) [not null]        // mật khẩu  
+  full_name varchar(100)                       // tên người dùng
+  email varchar(100)                           // email  
+  role varchar(10) [default: 'user']           // admin | user
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]  
+}
+
+Table sessions {
+  id int [pk, increment]                       
+  user_id int [not null, ref: > users.id]      
+  token varchar(255) [unique, not null]        // token phiên đăng nhập
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]  
+  expires_at timestamp                         // thời điểm hết hạn session
+}
+
+// mô phỏng cây hệ thống file
+Table nodes {
+  id int [pk, increment]                        
+  parent_id int [ref: > nodes.id]              // id của thư mục cha (null nếu là root)
+  owner_id int [not null, ref: > users.id]     // người sở hữu file/thư mục
+  name varchar(255) [not null]                 // tên file/thư mục
+  type varchar(10) [not null]                  // file | folder
+  size bigint [default: 0]                     // kích thước file, (folder = 0)
+  path varchar(500)                            // đường dẫn đầy đủ (optional)
+  created_at timestamp [default: `CURRENT_TIMESTAMP`] // ngày tạo
+  updated_at timestamp                          // ngày cập nhật cuối
+}
+
+// mô phỏng quyền kiểu Linux
+Table permissions {
+  node_id int [pk, ref: > nodes.id]            // id của file/thư mục được set quyền
+  owner_permission char(3) [default: 'rwx']    // quyền của chủ sở hữu: read/write/execute
+  // group_permission char(3) [default: 'r-x']
+  other_permission char(3) [default: 'r--']    // quyền với người khác (không được share)
+}
+
+// chia sẻ file cho người dùng
+Table shared_nodes {
+  id int [pk, increment]                       
+  node_id int [not null, ref: > nodes.id]       // file/thư mục được chia sẻ
+  shared_with_user int [not null, ref: > users.id] // người được chia sẻ
+  permission varchar(10) [default: 'read']      // mức quyền: read | write | full
+  created_at timestamp [default: `CURRENT_TIMESTAMP`] // thời điểm tạo chia sẻ
+}
+
+// metadata bổ sung cho file
+Table file_meta {
+  node_id int [pk, ref: > nodes.id]              // id file tương ứng
+  extension varchar(10)                          // đuôi file (.txt, .png…)
+  checksum varchar(64)                           // hash SHA-256 của file
+  mime_type varchar(50)                          // loại nội dung (image/png)
+}
+
+// nhật ký hoạt động hệ thống
+Table logs {
+  id int [pk, increment]                       
+  user_id int [not null, ref: > users.id]       // ai thực hiện hành động
+  node_id int [ref: > nodes.id]                 // tác động đến file/thư mục nào
+  action varchar(30)                             // loại hành động: upload, delete,...
+  description text                               // mô tả chi tiết
+  created_at timestamp [default: `CURRENT_TIMESTAMP`] // thời điểm ghi log
+}

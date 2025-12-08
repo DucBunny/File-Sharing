@@ -119,12 +119,10 @@ class DBManager:
         cursor.close()
         return user
 
-    # --- MỚI: HÀM ĐĂNG KÝ USER ---
     def register_user(self, username, password, fullname, email):
         if not self.conn: return False, "Lỗi kết nối CSDL"
         cursor = self.get_cursor()
         try:
-            # Hash mật khẩu
             pass_hash = hashlib.sha256(password.encode()).hexdigest()
             sql = "INSERT INTO users (username, password_hash, full_name, email, role) VALUES (%s, %s, %s, %s, 'user')"
             cursor.execute(sql, (username, pass_hash, fullname, email))
@@ -132,7 +130,6 @@ class DBManager:
             cursor.close()
             return True, "Đăng ký thành công!"
         except mysql.connector.Error as err:
-            # Mã lỗi 1062 là Duplicate entry (Trùng username)
             if err.errno == 1062:
                 return False, "Tên đăng nhập đã tồn tại."
             return False, f"Lỗi DB: {err}"
@@ -241,7 +238,6 @@ class FileServer:
                     else:
                         res = {"status": "fail", "message": "Sai tên đăng nhập hoặc mật khẩu"}
 
-                # --- MỚI: XỬ LÝ REGISTER ---
                 elif cmd == 'REGISTER':
                     ok, msg = self.db.register_user(req['username'], req['password'], req['fullname'], req['email'])
                     res = {"status": "success" if ok else "fail", "message": msg}
@@ -272,17 +268,25 @@ class FileServer:
                             res = {"status": "error", "message": "Lỗi truyền file"}
                 
                 elif cmd == 'DOWNLOAD_INIT':
+                    # Fix logic: Kiểm tra kỹ file tồn tại
                     node_id = req['node_id']
                     phy_path = os.path.join(SERVER_ROOT, str(node_id))
+                    
                     if os.path.exists(phy_path):
                         size = os.path.getsize(phy_path)
+                        # Gửi thông báo sẵn sàng
                         c_send_json(client_fd, {"status": "ready", "filesize": size})
-                        with open(phy_path, 'rb') as f:
-                            data = f.read()
-                        c_send_bytes(client_fd, data)
-                        continue
+                        
+                        # Đọc và gửi file
+                        try:
+                            with open(phy_path, 'rb') as f:
+                                data = f.read()
+                            c_send_bytes(client_fd, data)
+                        except Exception as e:
+                            print(f"Read error: {e}")
+                        continue # Bỏ qua việc gửi res JSON ở cuối vòng lặp
                     else:
-                        res = {"status": "error", "message": "File hỏng hoặc không tồn tại"}
+                        res = {"status": "error", "message": "File không tồn tại trên ổ đĩa server"}
 
                 elif cmd == 'SHARE_NODE':
                     if current_user:
@@ -345,11 +349,10 @@ class DriveGUI:
         
         tk.Button(card, text="Đăng Nhập", font=("Segoe UI", 12), bg="#1a73e8", fg="white", command=self.do_login).pack(fill=tk.X, pady=5)
         
-        # Nút chuyển sang Đăng Ký
         tk.Button(card, text="Chưa có tài khoản? Đăng ký ngay", font=("Segoe UI", 10), bg="white", fg="#1a73e8", 
                  bd=0, cursor="hand2", command=self.setup_register).pack(fill=tk.X, pady=10)
 
-    # --- MỚI: UI REGISTER ---
+    # --- UI: REGISTER ---
     def setup_register(self):
         self.clear_ui()
         frame = tk.Frame(self.root, bg="#f0f2f5")
@@ -436,12 +439,19 @@ class DriveGUI:
         scrollbar = ttk.Scrollbar(self.main_content, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = tk.Frame(self.canvas, bg="white")
         self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        
+        self.scrollable_frame.bind("<Button-1>", lambda e: self.on_bg_click(e))
+        self.canvas.bind("<Button-1>", lambda e: self.on_bg_click(e))
+
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=scrollbar.set)
         self.canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
         self.update_breadcrumbs()
+
+    def on_bg_click(self, event):
+        self.canvas.focus_set()
 
     def create_sidebar_btn(self, parent, text, cmd):
         btn = tk.Button(parent, text=text, font=("Segoe UI", 11), bg="white", bd=0, anchor="w", padx=20, command=cmd)
@@ -519,16 +529,16 @@ class DriveGUI:
 
     def show_context_menu(self, event, node):
         menu = tk.Menu(self.root, tearoff=0)
+        # Sử dụng lambda n=node để bind giá trị node vào thời điểm tạo menu
         if node['type'] == 'file':
-            menu.add_command(label="Download", command=lambda: self.download_node(node))
-        menu.add_command(label="Chia sẻ", command=lambda: self.share_dialog(node))
+            menu.add_command(label="Download", command=lambda n=node: self.download_node(n))
+        menu.add_command(label="Chia sẻ", command=lambda n=node: self.share_dialog(n))
         
-        # SỬ DỤNG tk_popup THAY VÌ post ĐỂ TRÁNH LỖI FOCUS/TREO MENU
         try:
             menu.tk_popup(event.x_root, event.y_root)
         finally:
             menu.grab_release()
-
+            
     def show_create_menu(self):
         menu = tk.Menu(self.root, tearoff=0)
         menu.add_command(label="Tạo Thư Mục", command=self.create_folder)
@@ -537,7 +547,6 @@ class DriveGUI:
         x = self.root.winfo_rootx() + 50
         y = self.root.winfo_rooty() + 150
         
-        # SỬ DỤNG tk_popup THAY VÌ post
         try:
             menu.tk_popup(x, y)
         finally:
@@ -550,7 +559,6 @@ class DriveGUI:
             if res and res['status'] == 'success':
                 self.refresh_nodes()
 
-    # --- UPLOAD ĐÃ SỬA LỖI ---
     def upload_file(self):
         path = filedialog.askopenfilename()
         if not path: return
@@ -569,7 +577,6 @@ class DriveGUI:
                 data = f.read()
             c_send_bytes(self.sock_fd, data)
             
-            # Quan trọng: Đọc phản hồi cuối cùng
             final_res = c_recv_json(self.sock_fd)
             if final_res and final_res['status'] == 'success':
                 messagebox.showinfo("Thành công", "Upload thành công")
@@ -578,8 +585,11 @@ class DriveGUI:
 
             self.refresh_nodes()
 
+    # --- SỬA LỖI DOWNLOAD ---
     def download_node(self, node):
+        print(f"[DEBUG] Yêu cầu tải file id={node['id']}") # In ra terminal để debug
         res = self.send_req({"command": "DOWNLOAD_INIT", "node_id": node['id']})
+        
         if res and res['status'] == 'ready':
             data = c_recv_bytes(self.sock_fd)
             if data:
@@ -588,6 +598,10 @@ class DriveGUI:
                     with open(save_path, 'wb') as f:
                         f.write(data)
                     messagebox.showinfo("Done", "Download thành công")
+        else:
+            # Thêm thông báo lỗi nếu server trả về status != ready
+            msg = res.get('message', 'Không rõ') if res else "Không có phản hồi từ Server"
+            messagebox.showerror("Lỗi Tải File", f"Server báo lỗi: {msg}")
 
     def share_dialog(self, node):
         target = simpledialog.askstring("Chia sẻ", "Nhập username người nhận:")
