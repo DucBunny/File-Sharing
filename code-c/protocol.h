@@ -9,8 +9,13 @@
 #define CMD_LIST 3
 #define CMD_UPLOAD_INIT 4
 #define CMD_DOWNLOAD_INIT 5
-#define CMD_SHARE 6
+#define CMD_SHARE 6 // Mới: Chia sẻ node
 #define CMD_CREATE_FOLDER 7
+#define CMD_RENAME 8
+#define CMD_DELETE 9
+#define CMD_COPY 10
+#define CMD_MOVE 11
+#define CMD_SEARCH 12 // Mới: Tìm kiếm node
 #define CMD_ERROR 99
 #define CMD_SUCCESS 100
 
@@ -20,11 +25,12 @@ typedef struct
     int command;
     char username[50];
     char password[65]; // Hash sha256
-    char arg1[256];    // Filename, Folder name, Fullname
-    char arg2[256];    // Email, Target user
+    char arg1[256];    // Filename, Folder name, Fullname, New Name, Search Query, Target Username (Share)
+    char arg2[256];    // Email, Target user (Share Permission)
     long long size;    // Filesize
     int user_id;       // ID người dùng gửi yêu cầu
     int parent_id;     // ID thư mục cha (0 nếu là root)
+    int node_id;       // ID của node bị tác động (rename, delete, download, copy, move, share)
 } RequestPacket;
 
 // Cấu trúc gói tin Response (Server trả về)
@@ -35,7 +41,7 @@ typedef struct
     long long data_val; // Chứa ID mới tạo hoặc dữ liệu số khác
 } ResponsePacket;
 
-// Cấu trúc thông tin File (dùng cho lệnh LIST)
+// Cấu trúc thông tin File (dùng cho lệnh LIST/SEARCH)
 typedef struct
 {
     int id;
