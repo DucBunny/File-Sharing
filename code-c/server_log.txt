@@ -1,0 +1,24 @@
+[2025-12-24 15:31:09] === SERVER STARTED ===
+[2025-12-24 15:31:09] SERVER_LISTEN: Server running on port 65432
+[2025-12-24 15:31:48] CONNECT: New connection from 127.0.0.1
+[2025-12-24 15:32:27] CONNECT: New connection from 127.0.0.1
+[2025-12-24 15:32:57] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-24 15:33:05] LOGIN_SUCCESS: User 'haianh03' (ID: 2) logged in.
+[2025-12-24 15:33:21] UPLOAD_FILE_SUCCESS: User 'admin' (ID 1) uploaded file 'file_sharing_main.py' (ID 1, Size 52820) to Parent 'Root' (ID 0).
+[2025-12-24 15:33:29] UPLOAD_FOLDER_SUCCESS: User 'admin' (ID 1) uploaded folder 'icons' (ID 2) containing 3 files to Parent 'Root' (ID 0).
+[2025-12-24 15:33:43] SHARE_SUCCESS: User 'admin' (ID 1) shared 'icons' (ID 2) with 'haianh03' (Perm: read,write).
+[2025-12-24 15:33:54] UPLOAD_FILE_SUCCESS: User 'haianh03' (ID 2) uploaded file 'file_sharing_main.py' (ID 6, Size 52820) to Parent 'icons' (ID 2).
+[2025-12-24 15:34:21] SHARE_SUCCESS: User 'admin' (ID 1) shared 'icons' (ID 2) with 'haianh03' (Perm: read).
+[2025-12-24 15:34:31] CREATE_FOLDER_SUCCESS: User 'haianh03' (ID 2) created folder 'abc' (ID 7) in Parent 'icons' (ID 2).
+[2025-12-24 15:35:19] DELETE_SUCCESS: User 'admin' (ID 1) deleted 'icons' (ID 2) from Parent 'Root' (ID 0).
+[2025-12-24 15:35:27] DISCONNECT: User ID 1 disconnected.
+[2025-12-24 15:35:31] DISCONNECT: User ID 2 disconnected.
+[2025-12-24 15:55:35] === SERVER STARTED ===
+[2025-12-24 15:55:35] SERVER_LISTEN: Server running on port 65432
+[2025-12-24 15:55:57] === SERVER ENDED ===
+[2025-12-24 16:00:06] === SERVER STARTED ===
+[2025-12-24 16:00:06] SERVER_LISTEN: Server running on port 65432
+[2025-12-24 16:00:22] === SERVER ENDED ===
+[2025-12-24 16:02:00] === SERVER STARTED ===
+[2025-12-24 16:02:00] SERVER_LISTEN: Server running on port 65432
+[2025-12-24 16:02:02] === SERVER ENDED ===

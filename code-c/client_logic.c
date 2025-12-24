@@ -3,6 +3,11 @@
 #include <string.h>
 #include "protocol.h"
 #include "network_logic.c" // Import code mạng tầng thấp
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <errno.h>    // Cần để check lỗi timeout chi tiết
+
+#define BUFFER_SIZE 8192
 
 static socket_t g_sock = INVALID_SOCKET;
 static int g_user_id = -1;
@@ -80,6 +85,7 @@ int cli_register(const char *username, const char *pass_hash, const char *fullna
 }
 
 // Tạo thư mục (Mới)
+// Sửa hàm này để trả về new_node_id
 int cli_create_folder(const char *name, int parent_id, char *out_msg)
 {
     RequestPacket req;
@@ -87,24 +93,30 @@ int cli_create_folder(const char *name, int parent_id, char *out_msg)
     req.command = CMD_CREATE_FOLDER;
     req.user_id = g_user_id;
     req.parent_id = parent_id;
-    strcpy(req.arg1, name); // arg1 chứa tên folder
+    strcpy(req.arg1, name);
 
     send_packet(g_sock, (char *)&req, sizeof(req));
 
     int len;
     char *data = recv_packet(g_sock, &len);
-    if (!data)
-    {
+    if (!data) {
         strcpy(out_msg, "Network Error");
-        return 0;
+        return -1;
     }
 
     ResponsePacket res;
-    memcpy(&res, data, sizeof(res));
+    // Xử lý an toàn kích thước
+    size_t copy_size = (len < sizeof(ResponsePacket)) ? len : sizeof(ResponsePacket);
+    memcpy(&res, data, copy_size);
     free(data);
 
     strcpy(out_msg, res.message);
-    return (res.status == CMD_SUCCESS);
+    
+    if (res.status == CMD_SUCCESS) {
+        // Trả về ID của folder mới (Server phải gửi cái này trong data_val)
+        return (int)res.data_val;
+    }
+    return -1; // Thất bại
 }
 
 // Lấy danh sách file (Dùng cho LIST và SEARCH)
@@ -267,54 +279,99 @@ int cli_upload(const char *filepath, const char *filename, long long filesize, i
 // Tên hàm cli_download được giữ nguyên để Python sử dụng cho cả file và folder (dạng zip)
 int cli_download(int node_id, const char *local_filepath, char *out_msg)
 {
+    // 1. Gửi Request
     RequestPacket req;
     memset(&req, 0, sizeof(req));
     req.command = CMD_DOWNLOAD_INIT;
     req.user_id = g_user_id;
-    req.node_id = node_id; // ID của file cần download
+    req.node_id = node_id;
 
-    send_packet(g_sock, (char *)&req, sizeof(req));
+    if (send_packet(g_sock, (char *)&req, sizeof(req)) <= 0) {
+        snprintf(out_msg, 256, "Send Request Failed");
+        return 0;
+    }
 
-    // Chờ server báo Ready và kích thước file
-    int len;
-    char *data = recv_packet(g_sock, &len);
-    if (!data)
-    {
-        strcpy(out_msg, "Network Error");
+    // 2. Nhận Header
+    int len = 0;
+    char *data = recv_packet(g_sock, &len); // len là tổng số byte nhận được
+    if (!data) {
+        snprintf(out_msg, 256, "Network Error: Cannot receive header");
+        return 0;
+    }
+
+    size_t min_required = sizeof(int) + sizeof(int) + sizeof(long long);
+    if (len < min_required) {
+        free(data);
+        snprintf(out_msg, 256, "Invalid packet size (%d bytes)", len);
         return 0;
     }
 
     ResponsePacket res;
-    memcpy(&res, data, sizeof(res));
-    free(data);
+    memset(&res, 0, sizeof(res));
+    
+    // Copy Header
+    size_t header_size = sizeof(ResponsePacket);
+    size_t bytes_to_copy = (len < header_size) ? len : header_size;
+    memcpy(&res, data, bytes_to_copy);
 
-    if (res.status != CMD_SUCCESS)
-    {
-        strcpy(out_msg, res.message);
+    if (res.status != CMD_SUCCESS) {
+        free(data);
+        snprintf(out_msg, 256, "Server Error: %.240s", res.message);
         return 0;
     }
 
     long long filesize = res.data_val;
 
+    // 3. Mở file
     FILE *fp = fopen(local_filepath, "wb");
-    if (!fp)
-    {
-        strcpy(out_msg, "Cannot create local file");
+    if (!fp) {
+        free(data);
+        snprintf(out_msg, 256, "Cannot open local file: %s", local_filepath);
         return 0;
     }
 
-    // Nhận stream bytes
+    // --- [LOGIC MỚI] XỬ LÝ DỮ LIỆU THỪA TỪ GÓI HEADER ---
     long long remaining = filesize;
-    char buffer[4096];
-    int total_received = 0;
+    long long total_received = 0;
 
-    while (remaining > 0)
-    {
-        int to_read = (remaining > 4096) ? 4096 : (int)remaining;
+    // Nếu recv_packet lỡ đọc lấn sang nội dung file
+    if (len > header_size) {
+        int extra_len = len - header_size;
+        // Ghi phần thừa vào file ngay lập tức
+        fwrite(data + header_size, 1, extra_len, fp);
+        
+        remaining -= extra_len;
+        total_received += extra_len;
+        
+        // Debug output removed to avoid terminal prints
+    }
+    
+    free(data); // Bây giờ mới được free
+    // --------------------------------------------------------
+
+    // 4. Thiết lập Timeout
+    struct timeval tv;
+    tv.tv_sec = 5; 
+    tv.tv_usec = 0;
+    setsockopt(g_sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
+    // 5. Vòng lặp nhận phần còn lại
+    char buffer[8192];
+    
+    while (remaining > 0) {
+        int to_read = (remaining > 8192) ? 8192 : (int)remaining;
+        
         int n = recv(g_sock, buffer, to_read, 0);
 
-        if (n <= 0)
-        {
+        if (n < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) 
+                snprintf(out_msg, 256, "Timeout: Server stopped sending data.");
+            else 
+                snprintf(out_msg, 256, "Socket Error.");
+            break;
+        }
+        else if (n == 0) {
+            snprintf(out_msg, 256, "Connection closed unexpectedly.");
             break;
         }
 
@@ -322,16 +379,19 @@ int cli_download(int node_id, const char *local_filepath, char *out_msg)
         remaining -= n;
         total_received += n;
     }
-    fclose(fp);
 
-    if (total_received == filesize)
-    {
-        strcpy(out_msg, "Download OK");
+    fclose(fp);
+    
+    // Reset Timeout
+    tv.tv_sec = 0;
+    setsockopt(g_sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
+    if (total_received == filesize) {
+        snprintf(out_msg, 256, "Download OK");
         return 1;
-    }
-    else
-    {
-        sprintf(out_msg, "Download incomplete (Expected: %lld, Received: %d)", filesize, total_received);
+    } else {
+        if (strlen(out_msg) == 0) 
+            snprintf(out_msg, 256, "Incomplete: %lld/%lld bytes", total_received, filesize);
         return 0;
     }
 }
@@ -487,4 +547,55 @@ void cli_free_path(PathNode *ptr)
 {
     if (ptr)
         free(ptr);
+}
+
+// Hàm lấy danh sách chia sẻ
+ShareEntry* cli_get_share_list(int node_id, int *count_out) {
+    RequestPacket req; memset(&req, 0, sizeof(req));
+    req.command = CMD_GET_SHARE_LIST;
+    req.user_id = g_user_id;
+    req.node_id = node_id;
+    
+    send_packet(g_sock, (char*)&req, sizeof(req));
+    
+    int len;
+    char *data = recv_packet(g_sock, &len);
+    if (!data) { *count_out = 0; return NULL; }
+    
+    int count = *(int*)data;
+    free(data);
+    *count_out = count;
+    
+    if (count == 0) return NULL;
+    
+    ShareEntry *list = malloc(count * sizeof(ShareEntry));
+    for (int i = 0; i < count; i++) {
+        data = recv_packet(g_sock, &len);
+        memcpy(&list[i], data, sizeof(ShareEntry));
+        free(data);
+    }
+    return list;
+}
+
+void cli_free_share_list(ShareEntry *list) {
+    if (list) free(list);
+}
+
+// Hàm gỡ chia sẻ
+int cli_remove_share(int node_id, const char *username, char *out_msg) {
+    RequestPacket req; memset(&req, 0, sizeof(req));
+    req.command = CMD_REMOVE_SHARE;
+    req.user_id = g_user_id;
+    req.node_id = node_id;
+    strcpy(req.arg1, username);
+    
+    send_packet(g_sock, (char*)&req, sizeof(req));
+    
+    int len;
+    char *data = recv_packet(g_sock, &len);
+    if (!data) { strcpy(out_msg, "Network Error"); return 0; }
+    
+    ResponsePacket res; memcpy(&res, data, sizeof(res)); free(data);
+    strcpy(out_msg, res.message);
+    return (res.status == CMD_SUCCESS);
 }
