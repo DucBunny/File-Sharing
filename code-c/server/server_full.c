@@ -1339,7 +1339,7 @@ void handle_copy(int sock, MYSQL *conn, RequestPacket *req)
         strcpy(res.message, "Source not found");
         char username[50];
         get_username_by_id(conn, req->user_id, username);
-        write_log("COPY_FAIL: User '%s' (ID %d) attempted to copy missing source Node ID %d.", username, req->user_id, req->node_id);
+        write_log("COPY_FAIL: (1) User '%s' (ID %d) attempted to copy missing source Node ID %d.", username, req->user_id, req->node_id);
         send_packet(sock, (char *)&res, sizeof(res));
         return;
     }
@@ -1355,8 +1355,19 @@ void handle_copy(int sock, MYSQL *conn, RequestPacket *req)
     int is_folder = (strcmp(src_type, "folder") == 0);
     get_unique_name(conn, req->parent_id, src_name, final_name, is_folder);
 
-    sprintf(query, "INSERT INTO nodes (name, type, size, owner_id, parent_id, created_at) VALUES ('%s', '%s', %lld, %d, %d, NOW())",
-            final_name, src_type, src_size, req->user_id, req->parent_id);
+    char parent_id_str[20];
+    if (req->parent_id <= 0)
+    {
+        strcpy(parent_id_str, "NULL");
+    }
+    else
+    {
+        sprintf(parent_id_str, "%d", req->parent_id);
+    }
+
+    // Lưu ý: Đổi %d của parent_id thành %s
+    sprintf(query, "INSERT INTO nodes (name, type, size, owner_id, parent_id, created_at) VALUES ('%s', '%s', %lld, %d, %s, NOW())",
+            final_name, src_type, src_size, req->user_id, parent_id_str);
 
     if (mysql_query(conn, query) == 0)
     {
@@ -1386,7 +1397,7 @@ void handle_copy(int sock, MYSQL *conn, RequestPacket *req)
         strcpy(res.message, "DB Copy Error");
         char username[50];
         get_username_by_id(conn, req->user_id, username);
-        write_log("COPY_ERR: User '%s' (ID %d) failed to insert copy of Node ID %d to Parent ID %d. DB Error: %s",
+        write_log("COPY_ERR: (2) User '%s' (ID %d) failed to insert copy of Node ID %d to Parent ID %d. DB Error: %s",
                   username, req->user_id, req->node_id, req->parent_id, mysql_error(conn));
     }
     send_packet(sock, (char *)&res, sizeof(res));
@@ -1448,8 +1459,19 @@ void handle_move(int sock, MYSQL *conn, RequestPacket *req)
     char new_name[256];
     get_unique_name(conn, req->parent_id, current_name, new_name, (strcmp(type, "folder") == 0));
 
-    sprintf(query, "UPDATE nodes SET parent_id=%d, name='%s' WHERE id=%d ",
-            req->parent_id, new_name, req->node_id);
+        char parent_id_str[20];
+    if (req->parent_id <= 0)
+    {
+        strcpy(parent_id_str, "NULL");
+    }
+    else
+    {
+        sprintf(parent_id_str, "%d", req->parent_id);
+    }
+
+    // Lưu ý: Đổi %d của parent_id thành %s
+    sprintf(query, "UPDATE nodes SET parent_id=%s, name='%s' WHERE id=%d ",
+            parent_id_str, new_name, req->node_id);
 
     if (mysql_query(conn, query) == 0)
     {

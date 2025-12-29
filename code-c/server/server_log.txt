@@ -460,3 +460,39 @@
 [2025-12-29 09:33:23] DISCONNECT: User ID 1 disconnected.
 [2025-12-29 09:33:24] DISCONNECT: User ID 2 disconnected.
 [2025-12-29 09:33:31] === SERVER ENDED ===
+[2025-12-29 10:31:36] === SERVER STARTED ===
+[2025-12-29 10:31:36] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 10:31:44] CONNECT: New connection from 127.0.0.1
+[2025-12-29 10:31:50] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 10:31:56] CREATE_FOLDER_SUCCESS: User 'admin' (ID 1) created folder 'hehe' (ID 15) in Parent 'Root' (ID 0).
+[2025-12-29 10:32:04] UPLOAD_FILE_SUCCESS: User 'admin' (ID 1) uploaded file 'file.png' (ID 16, Size 35141) to Parent 'hehe' (ID 15).
+[2025-12-29 10:32:10] MOVE_ERR: User 'admin' (ID 1) failed to move Node ID 16 to Parent ID 0. DB Error: 
+[2025-12-29 10:32:16] MOVE_SUCCESS: User 'admin' (ID 1) moved 'file.png' (ID 16) to Parent 'folder123' (ID 9) (New Name: file.png).
+[2025-12-29 10:32:22] UPLOAD_FILE_SUCCESS: User 'admin' (ID 1) uploaded file 'shared.png' (ID 17, Size 53506) to Parent 'hehe' (ID 15).
+[2025-12-29 10:32:47] COPY_ERR: User 'admin' (ID 1) failed to insert copy of Node ID 17 to Parent ID 0. DB Error: 
+[2025-12-29 10:32:50] COPY_SUCCESS: User 'admin' (ID 1) copied 'shared.png' (ID 17) to Parent 'hehe' (ID 15) as 'shared (1).png' (ID 19).
+[2025-12-29 10:32:55] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 10:32:57] === SERVER ENDED ===
+[2025-12-29 10:42:58] === SERVER STARTED ===
+[2025-12-29 10:42:58] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 10:43:01] CONNECT: New connection from 127.0.0.1
+[2025-12-29 10:43:12] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 10:43:23] COPY_ERR: (2) User 'admin' (ID 1) failed to insert copy of Node ID 17 to Parent ID 0. DB Error: 
+[2025-12-29 10:45:01] MOVE_ERR: User 'admin' (ID 1) failed to move Node ID 19 to Parent ID 0. DB Error: 
+[2025-12-29 10:45:18] MOVE_SUCCESS: User 'admin' (ID 1) moved 'shared (1).png' (ID 19) to Parent 'folder123' (ID 9) (New Name: shared (1).png).
+[2025-12-29 10:45:11] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:00:18] === SERVER ENDED ===
+[2025-12-29 11:00:46] === SERVER STARTED ===
+[2025-12-29 11:00:46] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:00:50] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:00:55] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:01:01] COPY_SUCCESS: User 'admin' (ID 1) copied 'shared.png' (ID 17) to Parent 'Root' (ID 0) as 'shared.png' (ID 21).
+[2025-12-29 11:01:06] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:01:54] === SERVER ENDED ===
+[2025-12-29 11:02:15] === SERVER STARTED ===
+[2025-12-29 11:02:15] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:02:05] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:02:14] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:02:21] DELETE_SUCCESS: User 'admin' (ID 1) deleted 'shared.png' (ID 21) from Parent 'Root' (ID 0).
+[2025-12-29 11:02:27] MOVE_SUCCESS: User 'admin' (ID 1) moved 'shared.png' (ID 17) to Parent 'Root' (ID 0) (New Name: shared.png).
+[2025-12-29 11:02:45] DISCONNECT: User ID 1 disconnected.
