@@ -9,11 +9,7 @@ import tempfile
 import threading
 
 # Thư viện PIL/Pillow cần thiết cho việc tải file ảnh
-try:
-    from PIL import Image, ImageTk
-    PIL_AVAILABLE = True
-except ImportError:
-    PIL_AVAILABLE = False
+from PIL import Image, ImageTk
 
 # --- ĐỊNH NGHĨA STRUCT C TRONG PYTHON ---
 class PathNode(ctypes.Structure): 
@@ -156,21 +152,21 @@ class DriveGUI(tk.Tk):
         self.icon_shared = None
         self.use_image_icons = False
 
-        if PIL_AVAILABLE:
-            try:
-                self.icon_folder = ImageTk.PhotoImage(
-                    Image.open(os.path.join(icon_path, "folder.png")).resize((48, 48))
-                )
-                self.icon_file = ImageTk.PhotoImage(
-                    Image.open(os.path.join(icon_path, "file.png")).resize((48, 48))
-                )
-                self.icon_shared = ImageTk.PhotoImage(
-                    Image.open(os.path.join(icon_path, "shared.png")).resize((16, 16))
-                )
-                pass
-                self.use_image_icons = True
-            except Exception as e:
-                pass
+        
+        try:
+            self.icon_folder = ImageTk.PhotoImage(
+                Image.open(os.path.join(icon_path, "folder.png")).resize((48, 48))
+            )
+            self.icon_file = ImageTk.PhotoImage(
+                Image.open(os.path.join(icon_path, "file.png")).resize((48, 48))
+            )
+            self.icon_shared = ImageTk.PhotoImage(
+                Image.open(os.path.join(icon_path, "shared.png")).resize((16, 16))
+            )
+            pass
+            self.use_image_icons = True
+        except Exception as e:
+            pass
 
     # --- HÀM THÔNG BÁO TÙY CHỈNH (Đã fix lỗi Linux/WSL) ---
     def show_custom_message(self, title, message, is_error=False, parent=None):

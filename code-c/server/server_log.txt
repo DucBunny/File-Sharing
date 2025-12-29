@@ -496,3 +496,31 @@
 [2025-12-29 11:02:21] DELETE_SUCCESS: User 'admin' (ID 1) deleted 'shared.png' (ID 21) from Parent 'Root' (ID 0).
 [2025-12-29 11:02:27] MOVE_SUCCESS: User 'admin' (ID 1) moved 'shared.png' (ID 17) to Parent 'Root' (ID 0) (New Name: shared.png).
 [2025-12-29 11:02:45] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:14:57] === SERVER ENDED ===
+[2025-12-29 11:15:25] === SERVER STARTED ===
+[2025-12-29 11:15:25] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:15:28] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:15:33] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:15:41] MOVE_SUCCESS: User 'admin' (ID 1) moved 'shared.png' (ID 17) to Parent 'folder123' (ID 9) (New Name: shared.png).
+[2025-12-29 11:15:48] COPY_SUCCESS: User 'admin' (ID 1) copied 'shared (1).png' (ID 19) to Parent 'Root' (ID 0) as 'shared (1).png' (ID 22).
+[2025-12-29 11:15:50] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:16:00] === SERVER ENDED ===
+[2025-12-29 11:21:56] === SERVER STARTED ===
+[2025-12-29 11:21:56] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:21:59] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:22:04] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:22:08] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:22:54] === SERVER ENDED ===
+[2025-12-29 11:23:40] === SERVER STARTED ===
+[2025-12-29 11:23:40] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:24:57] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:25:03] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:25:42] MOVE_SUCCESS: User 'admin' (ID 1) moved 'shared (1).png' (ID 22) to Parent 'hehe' (ID 15) (New Name: shared (1).png).
+[2025-12-29 11:25:36] COPY_SUCCESS: User 'admin' (ID 1) copied 'shared (1).png' (ID 22) to Parent 'Root' (ID 0) as 'shared (1).png' (ID 23).
+[2025-12-29 11:25:38] DISCONNECT: User ID 1 disconnected.
+[2025-12-29 11:25:41] === SERVER ENDED ===
+[2025-12-29 11:29:30] === SERVER STARTED ===
+[2025-12-29 11:29:30] SERVER_LISTEN: Server running on port 65432
+[2025-12-29 11:29:34] CONNECT: New connection from 127.0.0.1
+[2025-12-29 11:29:39] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2025-12-29 11:29:53] DISCONNECT: User ID 1 disconnected.

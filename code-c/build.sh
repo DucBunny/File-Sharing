@@ -3,17 +3,26 @@
 echo "--- BẮT ĐẦU THIẾT LẬP HỆ THỐNG FILE SHARING ---"
 
 # 1. Kiểm tra dependencies
-echo "[1/7] Kiểm tra các gói cần thiết..."
-if ! command -v mysql &> /dev/null; then
-    echo "MySQL chưa được cài. Đang cài đặt..."
+echo "[1/7] Kiểm tra tất cả các gói cần thiết; nếu thiếu sẽ tự cài..."
+REQUIRED_PACKAGES=(mysql-server libmysqlclient-dev build-essential python3-tk python3-pip zip gcc)
+MISSING=()
+for pkg in "${REQUIRED_PACKAGES[@]}"; do
+    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+        MISSING+=("$pkg")
+    fi
+done
+if [ ${#MISSING[@]} -ne 0 ]; then
+    echo "Gói thiếu: ${MISSING[*]}. Đang cài đặt..."
     sudo apt-get update
-    sudo apt-get install -y mysql-server libmysqlclient-dev build-essential python3-tk python3-pip zip
+    sudo apt-get install -y "${MISSING[@]}"
+else
+    echo "Đã cài tất cả các gói cần thiết."
 fi
 
 # 2. Cài thư viện Python
 echo "[2/7] Cài đặt thư viện Python..."
-pip3 install mysql-connector-python --break-system-packages \
-|| pip3 install mysql-connector-python
+pip3 install mysql-connector-python pillow --break-system-packages \
+|| pip3 install mysql-connector-python pillow
 
 # 3. Biên dịch Server
 echo "[3/7] Biên dịch Server..."
@@ -46,7 +55,7 @@ else
 fi
 
 # 6. Database
-read -p "[5/7] Khởi tạo lại Database? (y/n): " db_choice
+read -p "[6/7] Khởi tạo lại Database? (y/n): " db_choice
 if [ "$db_choice" = "y" ]; then
     echo "Nhập mật khẩu MySQL root"
     sudo mysql -u root -p < server/setup_db.sql
@@ -73,4 +82,3 @@ echo "     cd client"
 echo "     python3 file_sharing_main.py"
 echo ""
 echo "--- HOÀN TẤT THIẾT LẬP ---"
-
