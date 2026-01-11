@@ -26,11 +26,18 @@ pip3 install mysql-connector-python pillow --break-system-packages \
 
 # 3. Biên dịch Server
 echo "[3/7] Biên dịch Server..."
-if [ -f "server/server_full.c" ]; then
-    gcc -o server/server_full server/server_full.c -lmysqlclient -lpthread
+if [ -f "server/server_main.c" ]; then
+    gcc -o server/server_full \
+        server/server_main.c \
+        server/server_logging.c \
+        server/server_db.c \
+        server/server_permissions.c \
+        server/server_file_ops.c \
+        server/server_handlers.c \
+        -lmysqlclient -lpthread
     echo " -> Đã biên dịch Server"
 else
-    echo "LỖI: Không tìm thấy server/server_full.c"
+    echo "LỖI: Không tìm thấy server/server_main.c"
     exit 1
 fi
 

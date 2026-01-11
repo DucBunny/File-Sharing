@@ -5,7 +5,7 @@
 #include "../common/network_logic.c"
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <errno.h> // Cần để check lỗi timeout chi tiết
+#include <errno.h>
 
 #define BUFFER_SIZE 8192
 
@@ -85,7 +85,6 @@ int cli_register(const char *username, const char *pass_hash, const char *fullna
 }
 
 // Tạo thư mục (Mới)
-// Sửa hàm này để trả về new_node_id
 int cli_create_folder(const char *name, int parent_id, char *out_msg)
 {
     RequestPacket req;
@@ -278,7 +277,6 @@ int cli_upload(const char *filepath, const char *filename, long long filesize, i
 }
 
 // Download file
-// Tên hàm cli_download được giữ nguyên để Python sử dụng cho cả file và folder (dạng zip)
 int cli_download(int node_id, const char *local_filepath, char *out_msg)
 {
     // 1. Gửi Request
@@ -337,7 +335,7 @@ int cli_download(int node_id, const char *local_filepath, char *out_msg)
         return 0;
     }
 
-    // --- [LOGIC MỚI] XỬ LÝ DỮ LIỆU THỪA TỪ GÓI HEADER ---
+    // --- XỬ LÝ DỮ LIỆU THỪA TỪ GÓI HEADER ---
     long long remaining = filesize;
     long long total_received = 0;
 
@@ -355,7 +353,6 @@ int cli_download(int node_id, const char *local_filepath, char *out_msg)
     }
 
     free(data); // Bây giờ mới được free
-    // --------------------------------------------------------
 
     // 4. Thiết lập Timeout
     struct timeval tv;

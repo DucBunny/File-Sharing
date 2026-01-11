@@ -3,7 +3,7 @@ from tkinter import ttk, filedialog, simpledialog
 import ctypes
 import os
 import hashlib
-from zipfile import ZipFile # Thư viện nén/giải nén
+from zipfile import ZipFile  
 import shutil # Để xóa thư mục tạm thời
 import tempfile
 import threading
@@ -636,14 +636,7 @@ class DriveGUI(tk.Tk):
             
             if res == 1:
                 if node_type == "folder":
-                    try:
-                        extract_path = os.path.splitext(save_path)[0]
-                        with ZipFile(save_path, 'r') as zip_ref:
-                            zip_ref.extractall(extract_path)
-                        os.remove(save_path)
-                        message = f"Đã tải và giải nén folder tại:\n{extract_path}"
-                    except Exception as e:
-                        message = f"Tải zip thành công nhưng lỗi giải nén: {str(e)}"
+                    message = f"Download thành công: {save_name}\nFile zip đã được lưu tại:\n{save_path}"
                 else:
                     message = f"Download thành công: {name}"
                 
@@ -802,7 +795,7 @@ class DriveGUI(tk.Tk):
             self.show_custom_message("Điều hướng thành công", f"Đã chuyển đến thư mục chứa '{node_name}'.")
 
     def share_node(self, node):
-        target = simpledialog.askstring("Chia sẻ", f"Nhập username người muốn chia sẻ '{node['name']}':")
+        target = simpledialog.askstring("Chia sẻ", f"Nhập tên người muốn chia sẻ '{node['name']}':")
         if not target: return
         
         if target == self.logged_in_username:
@@ -825,7 +818,7 @@ class DriveGUI(tk.Tk):
                                     success_msg="Đổi tên thành công")
 
     def delete_node(self, node):
-        if self.show_custom_confirmation("Xác nhận Xóa", f"Bạn có chắc chắn muốn xóa '{node['name']}' không? Hành động này không thể hoàn tác."):
+        if self.show_custom_confirmation("Xác nhận Xóa", f"Bạn có chắc chắn muốn xóa '{node['name']}' không? \nHành động này không thể hoàn tác."):
             self.execute_cli_action(cli.cli_delete, node['id'], 
                                     success_msg="Xóa thành công")
 
