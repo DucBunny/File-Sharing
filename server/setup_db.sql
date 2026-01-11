@@ -1,6 +1,3 @@
--- File này dùng để khởi tạo database và user cho hệ thống
--- Chạy bằng lệnh: sudo mysql < setup_db.sql
-
 -- 1. Xóa Database cũ (nếu có) để làm sạch lỗi
 DROP DATABASE IF EXISTS file_system_db;
 
@@ -9,7 +6,6 @@ CREATE DATABASE file_system_db;
 USE file_system_db;
 
 -- 3. Tạo User riêng cho ứng dụng
--- Lưu ý: Nếu bạn đổi password ở đây, hãy nhớ đổi trong server_full.c
 CREATE USER IF NOT EXISTS 'fileuser'@'localhost' IDENTIFIED BY 'FilePassword123';
 GRANT ALL PRIVILEGES ON file_system_db.* TO 'fileuser'@'localhost';
 FLUSH PRIVILEGES;
