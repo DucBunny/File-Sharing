@@ -1,0 +1,12 @@
+.so
+# Ignore any compiled shared libraries
+*.so
+
+# Ignore server binary and logs
+server/server_full
+server/server_log.txt
+server/server_storage
+
+# Ignore compiled libs
+client/*.so
+common/*.so
