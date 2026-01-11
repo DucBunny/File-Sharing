@@ -1,7 +1,7 @@
 # Cấu trúc Server Module - File Sharing System
 
 ## Tổng quan
-Server đã được tái cấu trúc thành các module riêng biệt theo chức năng để dễ bảo trì và mở rộng.
+Server được tái cấu trúc thành các module riêng biệt theo chức năng.
 
 ## Cấu trúc Module
 
@@ -84,15 +84,3 @@ gcc -o server/server_full \
 cd server
 ./server_full
 ```
-
-## Lợi ích của cấu trúc mới
-
-1. **Dễ bảo trì:** Mỗi module có trách nhiệm rõ ràng
-2. **Dễ test:** Có thể test từng module độc lập
-3. **Dễ mở rộng:** Thêm chức năng mới không ảnh hưởng module khác
-4. **Code sạch hơn:** Tách biệt các concerns
-5. **Tái sử dụng:** Các module có thể dùng lại cho các dự án khác
-
-## File cũ
-
-File `server_full.c` gốc (1793 dòng) vẫn được giữ lại để tham khảo nhưng không còn được sử dụng.

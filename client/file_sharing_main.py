@@ -168,7 +168,7 @@ class DriveGUI(tk.Tk):
         except Exception as e:
             pass
 
-    # --- HÀM THÔNG BÁO TÙY CHỈNH (Đã fix lỗi Linux/WSL) ---
+    # --- HÀM THÔNG BÁO TÙY CHỈNH ---
     def show_custom_message(self, title, message, is_error=False, parent=None):
         if parent is None: parent = self
         dialog = tk.Toplevel(parent)
@@ -178,10 +178,8 @@ class DriveGUI(tk.Tk):
         
         dialog.transient(parent)
         
-        # --- FIX LỖI Ở ĐÂY ---
         dialog.wait_visibility() # Chờ cửa sổ hiện lên hẳn rồi mới chiếm quyền
         dialog.grab_set()
-        # ---------------------
         
         content_frame = tk.Frame(dialog, padx=20, pady=20)
         content_frame.pack(fill=tk.BOTH, expand=True)
@@ -198,7 +196,7 @@ class DriveGUI(tk.Tk):
         
         self.wait_window(dialog)
 
-    # --- HÀM XÁC NHẬN TÙY CHỈNH (Đã fix lỗi Linux/WSL) ---
+    # --- HÀM XÁC NHẬN TÙY CHỈNH ---
     def show_custom_confirmation(self, title, message, parent=None):
         if parent is None: parent = self
         dialog = tk.Toplevel(parent)
@@ -207,10 +205,8 @@ class DriveGUI(tk.Tk):
         dialog.resizable(False, False)
         dialog.transient(parent)
         
-        # --- FIX LỖI Ở ĐÂY ---
         dialog.wait_visibility() # Chờ cửa sổ hiện lên hẳn
         dialog.grab_set()
-        # ---------------------
 
         content_frame = tk.Frame(dialog, padx=20, pady=20)
         content_frame.pack(fill=tk.BOTH, expand=True)
@@ -244,7 +240,7 @@ class DriveGUI(tk.Tk):
     def start_auto_refresh(self):
         if hasattr(self, 'user_id') and self.user_id != -1 and not self.is_searching:
             try:
-                # [SỬA] Thêm wait_lock=False để nếu đang bận upload thì bỏ qua
+                # Thêm wait_lock=False để nếu đang bận upload thì bỏ qua
                 self.refresh_nodes(wait_lock=False)
             except Exception as e:
                 pass
@@ -265,7 +261,6 @@ class DriveGUI(tk.Tk):
             self.cli_lock.acquire()
 
         try:
-            # --- CODE CŨ BẮT ĐẦU TỪ ĐÂY ---
             # 1. Lấy dữ liệu từ Server
             count = ctypes.c_int(0)
             files_ptr = None
@@ -315,15 +310,14 @@ class DriveGUI(tk.Tk):
             for i, node in enumerate(new_data):
                 r, c = divmod(i, cols)
                 self.draw_node_item(node, r, c)
-            # --- HẾT CODE CŨ ---
             
         finally:
-            # [QUAN TRỌNG] Bắt buộc phải nhả khóa dù có lỗi hay không
+            # Bắt buộc phải nhả khóa dù có lỗi hay không
             self.cli_lock.release()
     
     # --- UI: LOGIN ---
     def setup_login(self):
-        # [MỚI] Hủy auto refresh nếu đang chạy
+        # Hủy auto refresh nếu đang chạy
         if hasattr(self, 'auto_refresh_job') and self.auto_refresh_job:
             self.after_cancel(self.auto_refresh_job)
             self.auto_refresh_job = None
@@ -358,11 +352,10 @@ class DriveGUI(tk.Tk):
                 self.user_id = uid
                 self.logged_in_username = u_raw
                 
-                # --- [THÊM ĐOẠN NÀY ĐỂ RESET TRẠNG THÁI] ---
+                # RESET TRẠNG THÁI 
                 self.current_parent_id = 0  # Luôn bắt đầu từ Root
                 self.path_stack = []        # Xóa lịch sử đường dẫn cũ
                 self.is_searching = False   # Tắt chế độ tìm kiếm (nếu có)
-                # -------------------------------------------
                 
                 self.setup_drive_ui()
             else:
@@ -467,7 +460,6 @@ class DriveGUI(tk.Tk):
         self.canvas.bind("<Button-3>", lambda e: self.show_canvas_context_menu(e))
         self.scrollable_frame.bind("<Button-3>", lambda e: self.show_canvas_context_menu(e))
         
-        # SỬA LỖI FOCUS
         self.scrollable_frame.bind("<Button-1>", lambda e: (self.main_content.focus_set(), self.scrollable_frame.focus_set()))
         self.canvas.bind("<Button-1>", lambda e: (self.main_content.focus_set(), self.canvas.focus_set()))
 
@@ -483,7 +475,7 @@ class DriveGUI(tk.Tk):
         
         self.last_node_data = []
         
-        # [MỚI] Bắt đầu chạy auto refresh
+        # Bắt đầu chạy auto refresh
         self.refresh_nodes()
         self.start_auto_refresh()
 
@@ -570,7 +562,7 @@ class DriveGUI(tk.Tk):
                 for _root, _dirs, _files in os.walk(local_root):
                     total_files_count += len(_files)
 
-                # [QUAN TRỌNG] Thêm đuôi __UPLOAD_REQ__{count} để Server biết đây là upload folder và số file
+                # Thêm đuôi __UPLOAD_REQ__{count} để Server biết đây là upload folder và số file
                 # Server sẽ tự động cắt đuôi này đi trước khi tạo, dùng count để log
                 root_name_req = (f"{base_name}__UPLOAD_REQ__{total_files_count}").encode('utf-8')
 
@@ -659,7 +651,7 @@ class DriveGUI(tk.Tk):
             else:
                 c_args.append(arg)
         
-        # [MỚI] Bọc trong lock
+        # Bọc trong lock
         with self.cli_lock:
             res = cli_func(*c_args, msg_buf)
             
@@ -868,10 +860,8 @@ class DriveGUI(tk.Tk):
         self.path_stack = []
         self.is_searching = False
         self.search_entry.delete(0, tk.END)
-        # --- [THÊM VÀO] ---
         for w in self.scrollable_frame.winfo_children(): w.destroy()
         self.last_node_data = None
-        # ------------------
         self.update_breadcrumbs()
         self.refresh_nodes()
 
@@ -882,12 +872,11 @@ class DriveGUI(tk.Tk):
         
         self.path_stack.append((node_id, name))
         self.current_parent_id = node_id
-        # --- [THÊM 3 DÒNG NÀY] ---
         # 1. Xóa ngay giao diện cũ để người dùng biết là đang chuyển trang
         for w in self.scrollable_frame.winfo_children(): w.destroy()
         # 2. Reset bộ nhớ đệm để refresh_nodes không tự ý return
         self.last_node_data = None 
-        # -------------------------
+
         self.refresh_nodes()
         self.update_breadcrumbs()
         
@@ -899,10 +888,8 @@ class DriveGUI(tk.Tk):
             self.current_parent_id = self.path_stack[-1][0]
             self.is_searching = False
             self.search_entry.delete(0, tk.END)
-            # --- [THÊM 3 DÒNG NÀY] ---
             for w in self.scrollable_frame.winfo_children(): w.destroy()
             self.last_node_data = None
-            # -------------------------
             self.update_breadcrumbs()
             self.refresh_nodes()
 

@@ -51,7 +51,7 @@ int cli_login(const char *username, const char *password_hash, char *out_msg)
     return -1;
 }
 
-// Đăng ký (Mới)
+// Đăng ký
 int cli_register(const char *username, const char *pass_hash, const char *fullname, const char *email, char *out_msg)
 {
     RequestPacket req;
@@ -84,7 +84,7 @@ int cli_register(const char *username, const char *pass_hash, const char *fullna
     return (res.status == CMD_SUCCESS);
 }
 
-// Tạo thư mục (Mới)
+// Tạo thư mục
 int cli_create_folder(const char *name, int parent_id, char *out_msg)
 {
     RequestPacket req;
@@ -518,7 +518,7 @@ int cli_move(int node_id, int target_parent_id, char *out_msg)
     return (res.status == CMD_SUCCESS);
 }
 
-// Chia sẻ node (Mới)
+// Chia sẻ node
 int cli_share_node(int node_id, const char *target_username, const char *permission, char *out_msg)
 {
     RequestPacket req;
