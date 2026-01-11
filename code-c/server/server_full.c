@@ -1459,7 +1459,7 @@ void handle_move(int sock, MYSQL *conn, RequestPacket *req)
     char new_name[256];
     get_unique_name(conn, req->parent_id, current_name, new_name, (strcmp(type, "folder") == 0));
 
-        char parent_id_str[20];
+    char parent_id_str[20];
     if (req->parent_id <= 0)
     {
         strcpy(parent_id_str, "NULL");

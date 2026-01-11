@@ -524,3 +524,11 @@
 [2025-12-29 11:29:34] CONNECT: New connection from 127.0.0.1
 [2025-12-29 11:29:39] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
 [2025-12-29 11:29:53] DISCONNECT: User ID 1 disconnected.
+[2026-01-10 14:32:59] === SERVER STARTED ===
+[2026-01-10 14:32:59] SERVER_LISTEN: Server running on port 65432
+[2026-01-10 14:33:27] === SERVER ENDED ===
+[2026-01-10 14:33:44] === SERVER STARTED ===
+[2026-01-10 14:33:44] SERVER_LISTEN: Server running on port 65432
+[2026-01-10 14:33:49] CONNECT: New connection from 127.0.0.1
+[2026-01-10 14:33:58] LOGIN_SUCCESS: User 'admin' (ID: 1) logged in.
+[2026-01-10 15:20:55] DISCONNECT: User ID 1 disconnected.
