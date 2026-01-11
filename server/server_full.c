@@ -1209,31 +1209,45 @@ void handle_delete(int sock, MYSQL *conn, RequestPacket *req)
 {
     ResponsePacket res;
     memset(&res, 0, sizeof(res));
-    if (!has_write_access(conn, req->node_id, req->user_id) ||
-        !has_write_access(conn, req->parent_id, req->user_id))
+
+    if (!check_ownership(conn, req->node_id, req->user_id))
     {
-        char username[50];
-        char node_name[100];
-        char parent_name[100];
-
-        get_username_by_id(conn, req->user_id, username);
-        get_node_name_by_id(conn, req->node_id, node_name);
-        get_node_name_by_id(conn, req->parent_id, parent_name);
-
-        write_log(
-            "DELETE_DENY: User '%s' (ID %d) lacks write permission on Node '%s' (ID %d) or Parent '%s' (ID %d).",
-            username,
-            req->user_id,
-            node_name,
-            req->node_id,
-            parent_name,
-            req->parent_id);
-
         res.status = CMD_ERROR;
         strcpy(res.message, "Access denied");
+        char username[50];
+        get_username_by_id(conn, req->user_id, username);
+        char node_name[256];
+        get_node_name_by_id(conn, req->node_id, node_name);
+        write_log("DELETE_FAIL: Access denied. User '%s' (ID %d) cannot delete '%s' (ID %d).", username, req->user_id, node_name, req->node_id);
         send_packet(sock, (char *)&res, sizeof(res));
         return;
     }
+
+    // if (!has_write_access(conn, req->node_id, req->user_id) ||
+    //     !has_write_access(conn, req->parent_id, req->user_id))
+    // {
+    //     char username[50];
+    //     char node_name[100];
+    //     char parent_name[100];
+
+    //     get_username_by_id(conn, req->user_id, username);
+    //     get_node_name_by_id(conn, req->node_id, node_name);
+    //     get_node_name_by_id(conn, req->parent_id, parent_name);
+
+    //     write_log(
+    //         "DELETE_DENY: User '%s' (ID %d) lacks write permission on Node '%s' (ID %d) or Parent '%s' (ID %d).",
+    //         username,
+    //         req->user_id,
+    //         node_name,
+    //         req->node_id,
+    //         parent_name,
+    //         req->parent_id);
+
+    //     res.status = CMD_ERROR;
+    //     strcpy(res.message, "Access denied");
+    //     send_packet(sock, (char *)&res, sizeof(res));
+    //     return;
+    // }
 
     char name[256];
     int parent_id = 0;
