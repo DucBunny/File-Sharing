@@ -323,6 +323,8 @@ class DriveGUI(tk.Tk):
             self.auto_refresh_job = None
             
         self.clear_ui()
+        # Khi vào màn hình đăng nhập, xóa username đã đăng nhập trước đó
+        self.logged_in_username = None
         frame = tk.Frame(self, bg="#f0f2f5")
         frame.pack(fill=tk.BOTH, expand=True)
         
@@ -474,10 +476,20 @@ class DriveGUI(tk.Tk):
         self.update_sidebar_paste_state()
         
         self.last_node_data = []
-        
+
+        # Status bar (username bottom-left)
+        status_bar = tk.Frame(self, bg="#f5f5f5", height=26)
+        status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.status_username_lbl = tk.Label(status_bar, text=f"Người dùng: {self.get_current_username()}",
+                           font=("Segoe UI", 10), bg="#f5f5f5", fg="#333")
+        self.status_username_lbl.pack(side=tk.LEFT, padx=8)
+
         # Bắt đầu chạy auto refresh
         self.refresh_nodes()
         self.start_auto_refresh()
+
+        # Cập nhật hiển thị username (nếu cần)
+        self.update_status_username()
 
     def create_sidebar_btn(self, parent, text, cmd):
         btn = tk.Button(parent, text=text, font=("Segoe UI", 11), bg="white", bd=0, anchor="w", padx=20, command=cmd)
@@ -803,6 +815,10 @@ class DriveGUI(tk.Tk):
     def get_current_username(self):
         return self.logged_in_username if self.logged_in_username else "Unknown" 
 
+    def update_status_username(self):
+        if hasattr(self, 'status_username_lbl'):
+            self.status_username_lbl.config(text=f"Người dùng: {self.get_current_username()}")
+
     def rename_node(self, node):
         new_name = simpledialog.askstring("Đổi tên", f"Đổi tên '{node['name']}' thành:", initialvalue=node['name'])
         if new_name and new_name != node['name']:
@@ -1008,12 +1024,21 @@ class DriveGUI(tk.Tk):
         for w in self.winfo_children(): w.destroy()
         
     def show_properties(self, node):
-        msg = f"""
+        # Nếu là folder, ẩn thông tin kích thước
+        if node.get('type') == 'folder':
+            msg = f"""
+        Tên: {node['name']}
+        Loại: {node['type']}
+        Chủ sở hữu: {node['owner']}
+        """
+        else:
+            msg = f"""
         Tên: {node['name']}
         Loại: {node['type']}
         Kích thước: {node['size']} bytes
         Chủ sở hữu: {node['owner']}
         """
+
         self.show_custom_message(f"Thông tin: {node['name']}", msg)
     
     def manage_permissions(self, node):
